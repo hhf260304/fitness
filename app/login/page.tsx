@@ -27,7 +27,7 @@ export default function LoginPage() {
   return (
     <div style={{
       display: 'flex', justifyContent: 'center', alignItems: 'center',
-      minHeight: '100dvh', background: '#F0F0F0', padding: '0 24px',
+      minHeight: '100dvh', background: C.surfaceHigh, padding: '0 24px',
     }}>
       <div style={{ width: '100%', maxWidth: 380 }}>
 
@@ -72,7 +72,7 @@ export default function LoginPage() {
               </div>
             )}
             <button type="submit" disabled={loginPending} style={{
-              padding: '13px', background: C.accent, color: '#050505',
+              padding: '13px', background: C.accent, color: '#000',
               border: 'none', borderRadius: 12, fontSize: 15, fontWeight: 800,
               cursor: loginPending ? 'not-allowed' : 'pointer',
               opacity: loginPending ? 0.7 : 1, marginTop: 4,

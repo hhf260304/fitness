@@ -119,9 +119,9 @@ function ExerciseEditCard({
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8, marginBottom: 14 }}>
         {numField('sets',   '組數',    C.accent)}
-        {numField('reps',   '次數',    '#4DA8FF')}
-        {numField('weight', '重量 kg', '#34D39A')}
-        {numField('rest',   '休息 s',  '#C47FFF')}
+        {numField('reps',   '次數',    MUSCLE_COLORS['胸'])}
+        {numField('weight', '重量 kg', MUSCLE_COLORS['背'])}
+        {numField('rest',   '休息 s',  MUSCLE_COLORS['肩'])}
       </div>
       <div style={{ display: 'flex', gap: 8 }}>
         <button onClick={() => onSave(local)} style={{
@@ -212,9 +212,9 @@ function AddExerciseSheet({
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, marginBottom: 20 }}>
           {numInp('sets',   '組數',    C.accent)}
-          {numInp('reps',   '次數',    '#4DA8FF')}
-          {numInp('weight', '重量 kg', '#34D39A')}
-          {numInp('rest',   '休息 s',  '#C47FFF')}
+          {numInp('reps',   '次數',    MUSCLE_COLORS['胸'])}
+          {numInp('weight', '重量 kg', MUSCLE_COLORS['背'])}
+          {numInp('rest',   '休息 s',  MUSCLE_COLORS['肩'])}
         </div>
 
         <button

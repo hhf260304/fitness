@@ -2,16 +2,8 @@
 
 import { useState } from 'react'
 import type { Goals } from '@/lib/types'
-import { C } from '@/lib/fitness-constants'
+import { C, MACRO_COLORS } from '@/lib/fitness-constants'
 import { logout } from '@/lib/actions/auth'
-
-const SETTINGS_MACRO_COLORS = {
-  calories: '#FF8A4C',
-  protein:  '#4DA8FF',
-  fat:      '#FF6B4D',
-  carbs:    '#FFD24D',
-  sugar:    '#FF4D8A',
-}
 
 // ── GoalRow ───────────────────────────────────────────────────
 function GoalRow({ field, label, unit, color, value, onChange }: {
@@ -75,9 +67,9 @@ function MacroRing({ goals }: { goals: Goals }) {
   const circ = 2 * Math.PI * r
 
   const segments = [
-    { color: SETTINGS_MACRO_COLORS.protein, pct: protCal / total, label: '蛋白質', grams: goals.protein },
-    { color: SETTINGS_MACRO_COLORS.fat,     pct: fatCal  / total, label: '脂肪',   grams: goals.fat     },
-    { color: SETTINGS_MACRO_COLORS.carbs,   pct: carbCal / total, label: '碳水',   grams: goals.carbs   },
+    { color: MACRO_COLORS.protein, pct: protCal / total, label: '蛋白質', grams: goals.protein },
+    { color: MACRO_COLORS.fat,     pct: fatCal  / total, label: '脂肪',   grams: goals.fat     },
+    { color: MACRO_COLORS.carbs,   pct: carbCal / total, label: '碳水',   grams: goals.carbs   },
   ]
 
   let offset = 0
@@ -163,11 +155,11 @@ export function SettingsTab({ goals, onSave }: {
   }
 
   const fields: { field: keyof Goals; label: string; unit: string; color: string }[] = [
-    { field: 'calories', label: '目標熱量',   unit: '每日 kcal', color: SETTINGS_MACRO_COLORS.calories },
-    { field: 'protein',  label: '蛋白質目標', unit: '每日 g',    color: SETTINGS_MACRO_COLORS.protein  },
-    { field: 'fat',      label: '脂肪目標',   unit: '每日 g',    color: SETTINGS_MACRO_COLORS.fat      },
-    { field: 'carbs',    label: '碳水目標',   unit: '每日 g',    color: SETTINGS_MACRO_COLORS.carbs    },
-    { field: 'sugar',    label: '糖目標',     unit: '每日 g',    color: SETTINGS_MACRO_COLORS.sugar    },
+    { field: 'calories', label: '目標熱量',   unit: '每日 kcal', color: C.orange           },
+    { field: 'protein',  label: '蛋白質目標', unit: '每日 g',    color: MACRO_COLORS.protein },
+    { field: 'fat',      label: '脂肪目標',   unit: '每日 g',    color: MACRO_COLORS.fat     },
+    { field: 'carbs',    label: '碳水目標',   unit: '每日 g',    color: MACRO_COLORS.carbs   },
+    { field: 'sugar',    label: '糖目標',     unit: '每日 g',    color: MACRO_COLORS.sugar   },
   ]
 
   return (
