@@ -1,10 +1,18 @@
-import { pgTable, serial, text, integer, numeric, date, time } from 'drizzle-orm/pg-core'
+import { pgTable, serial, text, integer, numeric, date, time, timestamp, unique } from 'drizzle-orm/pg-core'
 import { relations } from 'drizzle-orm'
 
+export const users = pgTable('users', {
+  id:             serial('id').primaryKey(),
+  email:          text('email').notNull().unique(),
+  hashedPassword: text('hashed_password').notNull(),
+  createdAt:      timestamp('created_at').defaultNow().notNull(),
+})
+
 export const sessions = pgTable('sessions', {
-  id:   serial('id').primaryKey(),
-  name: text('name').notNull(),
-  date: date('date').notNull(),
+  id:     serial('id').primaryKey(),
+  userId: integer('user_id').references(() => users.id, { onDelete: 'cascade' }),
+  name:   text('name').notNull(),
+  date:   date('date').notNull(),
 })
 
 export const exercises = pgTable('exercises', {
@@ -21,19 +29,23 @@ export const exercises = pgTable('exercises', {
 
 export const foodCatalog = pgTable('food_catalog', {
   id:       serial('id').primaryKey(),
-  name:     text('name').notNull().unique(),
+  userId:   integer('user_id').references(() => users.id, { onDelete: 'cascade' }),
+  name:     text('name').notNull(),
   calories: integer('calories').notNull(),
   protein:  numeric('protein', { precision: 6, scale: 1 }).notNull(),
   fat:      numeric('fat',     { precision: 6, scale: 1 }).notNull(),
   carbs:    numeric('carbs',   { precision: 6, scale: 1 }).notNull(),
   sugar:    numeric('sugar',   { precision: 6, scale: 1 }).notNull(),
-})
+}, (t) => [
+  unique('food_catalog_user_name_unique').on(t.userId, t.name),
+])
 
 export const meals = pgTable('meals', {
-  id:   serial('id').primaryKey(),
-  date: date('date').notNull(),
-  name: text('name').notNull(),
-  time: time('time').notNull(),
+  id:     serial('id').primaryKey(),
+  userId: integer('user_id').references(() => users.id, { onDelete: 'cascade' }),
+  date:   date('date').notNull(),
+  name:   text('name').notNull(),
+  time:   time('time').notNull(),
 })
 
 export const mealFoods = pgTable('meal_foods', {
@@ -49,16 +61,27 @@ export const mealFoods = pgTable('meal_foods', {
 
 export const goals = pgTable('goals', {
   id:       serial('id').primaryKey(),
-  date:     date('date').notNull().unique(),
+  userId:   integer('user_id').references(() => users.id, { onDelete: 'cascade' }),
+  date:     date('date').notNull(),
   calories: integer('calories').notNull(),
   protein:  integer('protein').notNull(),
   fat:      integer('fat').notNull(),
   carbs:    integer('carbs').notNull(),
   sugar:    integer('sugar').notNull(),
-})
+}, (t) => [
+  unique('goals_user_date_unique').on(t.userId, t.date),
+])
 
 // ── Relations ─────────────────────────────────────────────────
-export const sessionsRelations = relations(sessions, ({ many }) => ({
+export const usersRelations = relations(users, ({ many }) => ({
+  sessions:    many(sessions),
+  meals:       many(meals),
+  goals:       many(goals),
+  foodCatalog: many(foodCatalog),
+}))
+
+export const sessionsRelations = relations(sessions, ({ one, many }) => ({
+  user:      one(users, { fields: [sessions.userId], references: [users.id] }),
   exercises: many(exercises),
 }))
 
@@ -66,10 +89,19 @@ export const exercisesRelations = relations(exercises, ({ one }) => ({
   session: one(sessions, { fields: [exercises.sessionId], references: [sessions.id] }),
 }))
 
-export const mealsRelations = relations(meals, ({ many }) => ({
+export const mealsRelations = relations(meals, ({ one, many }) => ({
+  user:  one(users, { fields: [meals.userId], references: [users.id] }),
   foods: many(mealFoods),
 }))
 
 export const mealFoodsRelations = relations(mealFoods, ({ one }) => ({
   meal: one(meals, { fields: [mealFoods.mealId], references: [meals.id] }),
+}))
+
+export const goalsRelations = relations(goals, ({ one }) => ({
+  user: one(users, { fields: [goals.userId], references: [users.id] }),
+}))
+
+export const foodCatalogRelations = relations(foodCatalog, ({ one }) => ({
+  user: one(users, { fields: [foodCatalog.userId], references: [users.id] }),
 }))
