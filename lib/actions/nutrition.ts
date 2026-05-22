@@ -93,8 +93,8 @@ export async function createMeal(date: string, data: Omit<Meal, 'id'>): Promise<
 }
 
 export async function updateMeal(id: number, data: Omit<Meal, 'id'>): Promise<Meal> {
-  await verifySession()
-  await db.update(meals).set({ name: data.name, time: data.time }).where(eq(meals.id, id))
+  const { userId } = await verifySession()
+  await db.update(meals).set({ name: data.name, time: data.time }).where(and(eq(meals.id, id), eq(meals.userId, userId)))
   await db.delete(mealFoods).where(eq(mealFoods.mealId, id))
 
   if (data.foods.length > 0) {
@@ -118,6 +118,6 @@ export async function updateMeal(id: number, data: Omit<Meal, 'id'>): Promise<Me
 }
 
 export async function deleteMeal(id: number): Promise<void> {
-  await verifySession()
-  await db.delete(meals).where(eq(meals.id, id))
+  const { userId } = await verifySession()
+  await db.delete(meals).where(and(eq(meals.id, id), eq(meals.userId, userId)))
 }

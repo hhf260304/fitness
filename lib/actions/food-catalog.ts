@@ -2,7 +2,7 @@
 
 import { db } from '@/lib/db'
 import { foodCatalog } from '@/lib/db/schema'
-import { eq } from 'drizzle-orm'
+import { eq, and } from 'drizzle-orm'
 import type { Food } from '@/lib/types'
 import { verifySession } from '@/lib/session'
 
@@ -41,7 +41,7 @@ export async function createFood(data: Omit<Food, 'id'>): Promise<Food> {
 }
 
 export async function updateFood(id: number, data: Omit<Food, 'id'>): Promise<Food> {
-  await verifySession()
+  const { userId } = await verifySession()
   const [updated] = await db.update(foodCatalog)
     .set({
       name:     data.name,
@@ -51,13 +51,13 @@ export async function updateFood(id: number, data: Omit<Food, 'id'>): Promise<Fo
       carbs:    String(data.carbs),
       sugar:    String(data.sugar),
     })
-    .where(eq(foodCatalog.id, id))
+    .where(and(eq(foodCatalog.id, id), eq(foodCatalog.userId, userId)))
     .returning()
   if (!updated) throw new Error(`Food ${id} not found`)
   return toFood(updated)
 }
 
 export async function deleteFood(id: number): Promise<void> {
-  await verifySession()
-  await db.delete(foodCatalog).where(eq(foodCatalog.id, id))
+  const { userId } = await verifySession()
+  await db.delete(foodCatalog).where(and(eq(foodCatalog.id, id), eq(foodCatalog.userId, userId)))
 }

@@ -2,7 +2,7 @@
 
 import { db } from '@/lib/db'
 import { sessions, exercises } from '@/lib/db/schema'
-import { eq, desc } from 'drizzle-orm'
+import { eq, desc, and } from 'drizzle-orm'
 import type { Session, Exercise } from '@/lib/types'
 import { verifySession } from '@/lib/session'
 
@@ -70,7 +70,7 @@ export async function updateSession(id: number, data: Omit<Session, 'id'>): Prom
   const { userId } = await verifySession()
   await db.update(sessions)
     .set({ name: data.name, date: data.date })
-    .where(eq(sessions.id, id))
+    .where(and(eq(sessions.id, id), eq(sessions.userId, userId)))
 
   await db.delete(exercises).where(eq(exercises.sessionId, id))
 
@@ -96,6 +96,6 @@ export async function updateSession(id: number, data: Omit<Session, 'id'>): Prom
 }
 
 export async function deleteSession(id: number): Promise<void> {
-  await verifySession()
-  await db.delete(sessions).where(eq(sessions.id, id))
+  const { userId } = await verifySession()
+  await db.delete(sessions).where(and(eq(sessions.id, id), eq(sessions.userId, userId)))
 }
