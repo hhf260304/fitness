@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import type { Goals } from '@/lib/types'
 import { C } from '@/lib/fitness-constants'
+import { logout } from '@/lib/actions/auth'
 
 const SETTINGS_MACRO_COLORS = {
   calories: '#FF8A4C',
@@ -199,6 +200,22 @@ export function SettingsTab({ goals, onSave }: {
         }}>
           {saved ? '✓ 已儲存' : '儲存設定'}
         </button>
+      </div>
+
+      <div style={{ padding: '0 16px 32px' }}>
+        <form action={logout}>
+          <button type="submit" style={{
+            width: '100%',
+            background: 'transparent',
+            color: C.red,
+            border: `1px solid ${C.red}40`,
+            borderRadius: 14, padding: '13px',
+            fontSize: 15, fontWeight: 700,
+            cursor: 'pointer',
+          }}>
+            登出
+          </button>
+        </form>
       </div>
     </div>
   )
