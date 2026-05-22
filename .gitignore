@@ -39,3 +39,11 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+.env*.local
+
+# brainstorming / playwright automation
+.superpowers/
+.playwright-cli/
+
+# screenshots (generated during testing)
+screenshot-*.png
