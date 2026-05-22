@@ -9,10 +9,11 @@ export const users = pgTable('users', {
 })
 
 export const sessions = pgTable('sessions', {
-  id:     serial('id').primaryKey(),
-  userId: integer('user_id').references(() => users.id, { onDelete: 'cascade' }),
-  name:   text('name').notNull(),
-  date:   date('date').notNull(),
+  id:        serial('id').primaryKey(),
+  userId:    integer('user_id').references(() => users.id, { onDelete: 'cascade' }),
+  name:      text('name').notNull(),
+  date:      date('date').notNull(),
+  sortOrder: integer('sort_order').default(0).notNull(),
 })
 
 export const exercises = pgTable('exercises', {
