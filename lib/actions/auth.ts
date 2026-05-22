@@ -32,14 +32,16 @@ export async function register(prevState: FormState, formData: FormData): Promis
   if (password !== confirmPassword)            return { error: '兩次密碼不一致' }
   if (password.length < 8)                     return { error: '密碼至少需要 8 個字元' }
 
-  const [existing] = await db.select().from(users).where(eq(users.email, email))
+  const normalizedEmail = email.toLowerCase().trim()
+
+  const [existing] = await db.select().from(users).where(eq(users.email, normalizedEmail))
   if (existing) return { error: '此 email 已被使用' }
 
   const allUsers    = await db.select({ id: users.id }).from(users)
   const isFirstUser = allUsers.length === 0
 
   const hashedPassword = await bcrypt.hash(password, 12)
-  const [newUser] = await db.insert(users).values({ email, hashedPassword }).returning()
+  const [newUser] = await db.insert(users).values({ email: normalizedEmail, hashedPassword }).returning()
 
   if (isFirstUser) {
     await Promise.all([
