@@ -2,7 +2,7 @@
 
 import { db } from '@/lib/db'
 import { sessions, exercises } from '@/lib/db/schema'
-import { eq, desc, and } from 'drizzle-orm'
+import { eq, and } from 'drizzle-orm'
 import type { Session, Exercise } from '@/lib/types'
 import { verifySession } from '@/lib/session'
 

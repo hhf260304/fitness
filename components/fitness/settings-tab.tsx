@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import type { Goals } from '@/lib/types'
 import { C } from '@/lib/fitness-constants'
 import { logout } from '@/lib/actions/auth'
@@ -147,8 +147,11 @@ export function SettingsTab({ goals, onSave }: {
 }) {
   const [local, setLocal] = useState<Goals>({ ...goals })
   const [saved, setSaved] = useState(false)
-
-  useEffect(() => { setLocal({ ...goals }) }, [goals])
+  const [prevGoals, setPrevGoals] = useState(goals)
+  if (prevGoals !== goals) {
+    setPrevGoals(goals)
+    setLocal({ ...goals })
+  }
 
   const set = (k: keyof Goals, v: number) =>
     setLocal(prev => ({ ...prev, [k]: Math.max(0, v) }))
