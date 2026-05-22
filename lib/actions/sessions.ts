@@ -36,7 +36,7 @@ export async function getSessions(): Promise<Session[]> {
   const rows = await db.query.sessions.findMany({
     where: (t, { eq }) => eq(t.userId, userId),
     with:  { exercises: true },
-    orderBy: (t, { desc }) => [desc(t.date)],
+    orderBy: (t, { asc, desc }) => [asc(t.sortOrder), desc(t.id)],
   })
   return rows.map(r => toSession(r, r.exercises))
 }
@@ -98,4 +98,15 @@ export async function updateSession(id: number, data: Omit<Session, 'id'>): Prom
 export async function deleteSession(id: number): Promise<void> {
   const { userId } = await verifySession()
   await db.delete(sessions).where(and(eq(sessions.id, id), eq(sessions.userId, userId)))
+}
+
+export async function reorderSessions(ids: number[]): Promise<void> {
+  const { userId } = await verifySession()
+  await Promise.all(
+    ids.map((id, index) =>
+      db.update(sessions)
+        .set({ sortOrder: index })
+        .where(and(eq(sessions.id, id), eq(sessions.userId, userId)))
+    )
+  )
 }
