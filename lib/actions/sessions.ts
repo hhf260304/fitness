@@ -101,6 +101,7 @@ export async function deleteSession(id: number): Promise<void> {
 }
 
 export async function reorderSessions(ids: number[]): Promise<void> {
+  if (ids.length === 0) return
   const { userId } = await verifySession()
   await Promise.all(
     ids.map((id, index) =>
