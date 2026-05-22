@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import type { Session, Exercise, MuscleGroup } from '@/lib/types'
 import { C, MUSCLE_COLORS, MUSCLES } from '@/lib/fitness-constants'
+import type { DraggableSyntheticListeners } from '@dnd-kit/core'
 
 // ── MuscleTag ─────────────────────────────────────────────────
 function MuscleTag({ muscle, small }: { muscle: string; small?: boolean }) {
@@ -268,18 +269,34 @@ function AddExerciseSheet({
 
 // ── SessionCard ───────────────────────────────────────────────
 function SessionCard({
-  session, onUpdate, onDelete,
+  session, onUpdate, onDelete, dragListeners, dragAttributes,
 }: {
   session: Session
   onUpdate: (s: Session) => void
   onDelete: () => void
+  dragListeners?:  DraggableSyntheticListeners
+  dragAttributes?: React.HTMLAttributes<HTMLElement>
 }) {
   const [expanded, setExpanded]   = useState(false)
   const [editingId, setEditingId] = useState<number | null>(null)
   const [showAddEx, setShowAddEx] = useState(false)
+  const [editingName, setEditingName] = useState(false)
+  const [nameInput,   setNameInput]   = useState(session.name)
 
   const muscles   = [...new Set(session.exercises.map(e => e.muscle))].slice(0, 4)
   const totalSets = session.exercises.reduce((s, e) => s + (e.sets || 0), 0)
+
+  const totalRestSec = session.exercises.reduce((s, e) => s + e.sets * e.rest, 0)
+
+  const confirmNameEdit = () => {
+    setEditingName(false)
+    const trimmed = nameInput.trim()
+    if (trimmed && trimmed !== session.name) {
+      onUpdate({ ...session, name: trimmed })
+    } else {
+      setNameInput(session.name)
+    }
+  }
 
   const updateEx = (id: number, updated: Exercise) =>
     onUpdate({ ...session, exercises: session.exercises.map(e => e.id === id ? updated : e) })
@@ -294,15 +311,84 @@ function SessionCard({
       border: `1px solid ${expanded ? C.border + 'AA' : C.border}`,
       overflow: 'hidden', transition: 'border-color 0.2s', position: 'relative',
     }}>
-      <div onClick={() => setExpanded(p => !p)} style={{
-        display: 'flex', alignItems: 'flex-start', padding: '13px 14px', cursor: 'pointer', gap: 10,
-      }}>
+      {/* ── Card header ──────────────────────────────────── */}
+      <div
+        onClick={() => !editingName && setExpanded(p => !p)}
+        style={{
+          display: 'flex', alignItems: 'flex-start',
+          padding: '13px 14px', cursor: editingName ? 'default' : 'pointer', gap: 10,
+        }}
+      >
+        {/* Drag handle */}
+        <div
+          {...dragListeners}
+          {...dragAttributes}
+          onClick={e => e.stopPropagation()}
+          style={{
+            cursor: 'grab', color: C.textTer, flexShrink: 0,
+            display: 'flex', alignItems: 'center', alignSelf: 'center',
+            touchAction: 'none', padding: '4px 2px',
+          }}
+        >
+          <svg width="12" height="16" viewBox="0 0 12 16" fill="none">
+            <circle cx="3.5" cy="3"  r="1.5" fill="currentColor"/>
+            <circle cx="3.5" cy="8"  r="1.5" fill="currentColor"/>
+            <circle cx="3.5" cy="13" r="1.5" fill="currentColor"/>
+            <circle cx="8.5" cy="3"  r="1.5" fill="currentColor"/>
+            <circle cx="8.5" cy="8"  r="1.5" fill="currentColor"/>
+            <circle cx="8.5" cy="13" r="1.5" fill="currentColor"/>
+          </svg>
+        </div>
+
+        {/* Name + stats */}
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ fontSize: 15, fontWeight: 800, color: C.text }}>{session.name}</span>
+            {editingName ? (
+              <input
+                autoFocus
+                value={nameInput}
+                onChange={e => setNameInput(e.target.value)}
+                onBlur={confirmNameEdit}
+                onKeyDown={e => {
+                  if (e.key === 'Enter')  confirmNameEdit()
+                  if (e.key === 'Escape') { setEditingName(false); setNameInput(session.name) }
+                }}
+                onClick={e => e.stopPropagation()}
+                style={{
+                  flex: 1, fontSize: 15, fontWeight: 800, color: C.text,
+                  background: C.surfaceHigh, border: `1px solid ${C.accent}`,
+                  borderRadius: 8, padding: '3px 8px', outline: 'none',
+                }}
+              />
+            ) : (
+              <>
+                <span style={{ fontSize: 15, fontWeight: 800, color: C.text }}>
+                  {session.name}
+                </span>
+                <button
+                  onClick={e => { e.stopPropagation(); setEditingName(true) }}
+                  style={{
+                    background: 'none', border: 'none', color: C.textTer,
+                    cursor: 'pointer', padding: '2px', flexShrink: 0, lineHeight: 1,
+                  }}
+                >
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                    <path d="M8.5 1.5L10.5 3.5L4 10H2V8L8.5 1.5Z"
+                      stroke="currentColor" strokeWidth="1.4"
+                      strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+                  </svg>
+                </button>
+              </>
+            )}
           </div>
-          <div style={{ fontSize: 11, color: C.textSec, marginTop: 3, fontVariantNumeric: 'tabular-nums' }}>
+          <div style={{
+            fontSize: 11, color: C.textSec, marginTop: 3,
+            fontVariantNumeric: 'tabular-nums',
+          }}>
             {session.exercises.length} 個動作 · {totalSets} 總組數
+            {session.exercises.length > 0 && (
+              ` · 休息 ${Math.floor(totalRestSec / 60)}:${String(totalRestSec % 60).padStart(2, '0')}`
+            )}
           </div>
           {muscles.length > 0 && (
             <div style={{ display: 'flex', gap: 5, marginTop: 6, flexWrap: 'wrap' as const }}>
@@ -310,6 +396,8 @@ function SessionCard({
             </div>
           )}
         </div>
+
+        {/* Delete + chevron */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
           <button
             onClick={e => {
@@ -323,7 +411,8 @@ function SessionCard({
           <svg width="10" height="7" viewBox="0 0 10 7" style={{
             transform: expanded ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s',
           }}>
-            <path d="M1 1l4 4 4-4" stroke={C.textSec} strokeWidth="1.8" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M1 1l4 4 4-4" stroke={C.textSec} strokeWidth="1.8"
+              fill="none" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
         </div>
       </div>
