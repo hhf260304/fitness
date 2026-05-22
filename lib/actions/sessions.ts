@@ -4,6 +4,7 @@ import { db } from '@/lib/db'
 import { sessions, exercises } from '@/lib/db/schema'
 import { eq, desc } from 'drizzle-orm'
 import type { Session, Exercise } from '@/lib/types'
+import { verifySession } from '@/lib/session'
 
 function toExercise(row: typeof exercises.$inferSelect): Exercise {
   return {
@@ -31,16 +32,19 @@ function toSession(
 }
 
 export async function getSessions(): Promise<Session[]> {
+  const { userId } = await verifySession()
   const rows = await db.query.sessions.findMany({
-    with: { exercises: true },
+    where: (t, { eq }) => eq(t.userId, userId),
+    with:  { exercises: true },
     orderBy: (t, { desc }) => [desc(t.date)],
   })
   return rows.map(r => toSession(r, r.exercises))
 }
 
 export async function createSession(data: Omit<Session, 'id'>): Promise<Session> {
+  const { userId } = await verifySession()
   const [inserted] = await db.insert(sessions)
-    .values({ name: data.name, date: data.date })
+    .values({ userId, name: data.name, date: data.date })
     .returning()
 
   if (data.exercises.length > 0) {
@@ -63,6 +67,7 @@ export async function createSession(data: Omit<Session, 'id'>): Promise<Session>
 }
 
 export async function updateSession(id: number, data: Omit<Session, 'id'>): Promise<Session> {
+  const { userId } = await verifySession()
   await db.update(sessions)
     .set({ name: data.name, date: data.date })
     .where(eq(sessions.id, id))
@@ -91,5 +96,6 @@ export async function updateSession(id: number, data: Omit<Session, 'id'>): Prom
 }
 
 export async function deleteSession(id: number): Promise<void> {
+  await verifySession()
   await db.delete(sessions).where(eq(sessions.id, id))
 }

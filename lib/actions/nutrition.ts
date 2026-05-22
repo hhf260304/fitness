@@ -2,9 +2,10 @@
 
 import { db } from '@/lib/db'
 import { meals, mealFoods, goals } from '@/lib/db/schema'
-import { eq } from 'drizzle-orm'
+import { eq, and } from 'drizzle-orm'
 import type { Meal, Food, Goals, NutritionDay } from '@/lib/types'
 import { DEFAULT_GOALS } from '@/lib/data'
+import { verifySession } from '@/lib/session'
 
 function toFood(row: typeof mealFoods.$inferSelect): Food {
   return {
@@ -31,8 +32,9 @@ function toMeal(
 }
 
 export async function getNutritionDay(date: string): Promise<NutritionDay> {
+  const { userId } = await verifySession()
   const mealRows = await db.query.meals.findMany({
-    where: (t, { eq }) => eq(t.date, date),
+    where: (t, { and, eq }) => and(eq(t.userId, userId), eq(t.date, date)),
     with: { foods: true },
   })
   const dayGoals = await getGoals(date)
@@ -43,7 +45,9 @@ export async function getNutritionDay(date: string): Promise<NutritionDay> {
 }
 
 export async function getGoals(date: string): Promise<Goals> {
-  const [row] = await db.select().from(goals).where(eq(goals.date, date))
+  const { userId } = await verifySession()
+  const [row] = await db.select().from(goals)
+    .where(and(eq(goals.userId, userId), eq(goals.date, date)))
   if (!row) return DEFAULT_GOALS
   return {
     calories: row.calories,
@@ -55,17 +59,19 @@ export async function getGoals(date: string): Promise<Goals> {
 }
 
 export async function upsertGoals(date: string, data: Goals): Promise<void> {
+  const { userId } = await verifySession()
   await db.insert(goals)
-    .values({ date, ...data })
+    .values({ date, userId, ...data })
     .onConflictDoUpdate({
-      target: goals.date,
+      target: [goals.userId, goals.date],
       set:    { calories: data.calories, protein: data.protein, fat: data.fat, carbs: data.carbs, sugar: data.sugar },
     })
 }
 
 export async function createMeal(date: string, data: Omit<Meal, 'id'>): Promise<Meal> {
+  const { userId } = await verifySession()
   const [inserted] = await db.insert(meals)
-    .values({ date, name: data.name, time: data.time })
+    .values({ date, userId, name: data.name, time: data.time })
     .returning()
 
   if (data.foods.length > 0) {
@@ -87,6 +93,7 @@ export async function createMeal(date: string, data: Omit<Meal, 'id'>): Promise<
 }
 
 export async function updateMeal(id: number, data: Omit<Meal, 'id'>): Promise<Meal> {
+  await verifySession()
   await db.update(meals).set({ name: data.name, time: data.time }).where(eq(meals.id, id))
   await db.delete(mealFoods).where(eq(mealFoods.mealId, id))
 
@@ -111,5 +118,6 @@ export async function updateMeal(id: number, data: Omit<Meal, 'id'>): Promise<Me
 }
 
 export async function deleteMeal(id: number): Promise<void> {
+  await verifySession()
   await db.delete(meals).where(eq(meals.id, id))
 }
