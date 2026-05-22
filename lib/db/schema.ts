@@ -1,10 +1,10 @@
-import { pgTable, serial, text, integer, numeric } from 'drizzle-orm/pg-core'
+import { pgTable, serial, text, integer, numeric, date, time } from 'drizzle-orm/pg-core'
 import { relations } from 'drizzle-orm'
 
 export const sessions = pgTable('sessions', {
   id:   serial('id').primaryKey(),
   name: text('name').notNull(),
-  date: text('date').notNull(),
+  date: date('date').notNull(),
 })
 
 export const exercises = pgTable('exercises', {
@@ -21,7 +21,7 @@ export const exercises = pgTable('exercises', {
 
 export const foodCatalog = pgTable('food_catalog', {
   id:       serial('id').primaryKey(),
-  name:     text('name').notNull(),
+  name:     text('name').notNull().unique(),
   calories: integer('calories').notNull(),
   protein:  numeric('protein', { precision: 6, scale: 1 }).notNull(),
   fat:      numeric('fat',     { precision: 6, scale: 1 }).notNull(),
@@ -31,9 +31,9 @@ export const foodCatalog = pgTable('food_catalog', {
 
 export const meals = pgTable('meals', {
   id:   serial('id').primaryKey(),
-  date: text('date').notNull(),
+  date: date('date').notNull(),
   name: text('name').notNull(),
-  time: text('time').notNull(),
+  time: time('time').notNull(),
 })
 
 export const mealFoods = pgTable('meal_foods', {
@@ -49,7 +49,7 @@ export const mealFoods = pgTable('meal_foods', {
 
 export const goals = pgTable('goals', {
   id:       serial('id').primaryKey(),
-  date:     text('date').notNull().unique(),
+  date:     date('date').notNull().unique(),
   calories: integer('calories').notNull(),
   protein:  integer('protein').notNull(),
   fat:      integer('fat').notNull(),
