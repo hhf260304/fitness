@@ -3,9 +3,6 @@
 import type { TabId } from '@/lib/types'
 import { C } from '@/lib/fitness-constants'
 
-const ACCENT = '#C8FF00'
-const ORANGE = '#FF8A4C'
-
 function DumbbellIcon({ active }: { active: boolean }) {
   const fill = active ? '#000' : C.textSec
   return (
@@ -56,10 +53,10 @@ function SettingsIcon({ active }: { active: boolean }) {
 }
 
 const TABS: { id: TabId; label: string; Icon: React.FC<{ active: boolean }>; color: string }[] = [
-  { id: 'workout',   label: '訓練',  Icon: DumbbellIcon,  color: ACCENT },
-  { id: 'nutrition', label: '飲食',  Icon: ForkKnifeIcon, color: ORANGE },
-  { id: 'fooddb',    label: '食物庫', Icon: FoodDbIcon,    color: ORANGE },
-  { id: 'settings',  label: '設定',  Icon: SettingsIcon,  color: ACCENT },
+  { id: 'workout',   label: '訓練',  Icon: DumbbellIcon,  color: C.accent },
+  { id: 'nutrition', label: '飲食',  Icon: ForkKnifeIcon, color: C.orange },
+  { id: 'fooddb',    label: '食物庫', Icon: FoodDbIcon,    color: C.orange },
+  { id: 'settings',  label: '設定',  Icon: SettingsIcon,  color: C.accent },
 ]
 
 export function BottomTabBar({ tab, setTab }: { tab: TabId; setTab: (t: TabId) => void }) {
