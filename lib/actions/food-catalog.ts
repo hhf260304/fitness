@@ -48,6 +48,7 @@ export async function updateFood(id: number, data: Omit<Food, 'id'>): Promise<Fo
     })
     .where(eq(foodCatalog.id, id))
     .returning()
+  if (!updated) throw new Error(`Food ${id} not found`)
   return toFood(updated)
 }
 

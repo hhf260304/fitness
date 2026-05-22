@@ -105,6 +105,7 @@ export async function updateMeal(id: number, data: Omit<Meal, 'id'>): Promise<Me
   }
 
   const [row] = await db.select().from(meals).where(eq(meals.id, id))
+  if (!row) throw new Error(`Meal ${id} not found`)
   const foodRows = await db.select().from(mealFoods).where(eq(mealFoods.mealId, id))
   return toMeal(row, foodRows)
 }

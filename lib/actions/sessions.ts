@@ -85,6 +85,7 @@ export async function updateSession(id: number, data: Omit<Session, 'id'>): Prom
   }
 
   const [row] = await db.select().from(sessions).where(eq(sessions.id, id))
+  if (!row) throw new Error(`Session ${id} not found`)
   const exRows = await db.select().from(exercises).where(eq(exercises.sessionId, id))
   return toSession(row, exRows)
 }
