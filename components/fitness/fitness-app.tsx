@@ -202,7 +202,7 @@ export function FitnessApp({ initialSessions, initialFoodDb, initialGoals, initi
   return (
     <div style={{
       display: 'flex', justifyContent: 'center', alignItems: 'stretch',
-      minHeight: '100dvh', background: '#050505',
+      minHeight: '100dvh', background: '#F0F0F0',
     }}>
       <div style={{
         width: '100%', maxWidth: 430,
