@@ -69,14 +69,30 @@ function ExerciseEditCard({
   const set = <K extends keyof Exercise>(k: K, v: Exercise[K]) =>
     setLocal(prev => ({ ...prev, [k]: v }))
 
-  const numField = (key: 'sets' | 'reps' | 'weight' | 'rest', label: string, color: string) => (
+  type NumKey = 'sets' | 'reps' | 'weight' | 'rest'
+  const [strVals, setStrVals] = useState<Record<NumKey, string>>({
+    sets: String(exercise.sets), reps: String(exercise.reps),
+    weight: String(exercise.weight), rest: String(exercise.rest),
+  })
+
+  const numField = (key: NumKey, label: string, color: string) => (
     <div key={key} style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
       <label style={{ fontSize: 10, color, fontWeight: 700, letterSpacing: '0.4px', textTransform: 'uppercase' as const }}>
         {label}
       </label>
       <input
-        type="number" value={local[key]}
-        onChange={e => set(key, (parseFloat(e.target.value) || 0) as never)}
+        type="number" value={strVals[key]}
+        onChange={e => {
+          setStrVals(prev => ({ ...prev, [key]: e.target.value }))
+          const n = parseFloat(e.target.value)
+          if (!isNaN(n)) set(key, n as never)
+        }}
+        onBlur={() => {
+          const n = parseFloat(strVals[key])
+          const safe = isNaN(n) ? 0 : n
+          setStrVals(prev => ({ ...prev, [key]: String(safe) }))
+          set(key, safe as never)
+        }}
         style={{
           background: C.bg, border: `1px solid ${C.border}`,
           borderRadius: 10, padding: '9px 6px', color: C.text,
@@ -151,14 +167,29 @@ function AddExerciseSheet({
   const set = <K extends keyof typeof form>(k: K, v: typeof form[K]) =>
     setForm(prev => ({ ...prev, [k]: v }))
 
-  const numInp = (key: 'sets' | 'reps' | 'weight' | 'rest', label: string, color: string) => (
+  type NumKey2 = 'sets' | 'reps' | 'weight' | 'rest'
+  const [strVals, setStrVals] = useState<Record<NumKey2, string>>({
+    sets: '3', reps: '10', weight: '60', rest: '90',
+  })
+
+  const numInp = (key: NumKey2, label: string, color: string) => (
     <div key={key}>
       <label style={{ fontSize: 10, color, fontWeight: 700, letterSpacing: '0.4px', textTransform: 'uppercase' as const, display: 'block', marginBottom: 5 }}>
         {label}
       </label>
       <input
-        type="number" value={form[key]}
-        onChange={e => set(key, (parseFloat(e.target.value) || 0) as never)}
+        type="number" value={strVals[key]}
+        onChange={e => {
+          setStrVals(prev => ({ ...prev, [key]: e.target.value }))
+          const n = parseFloat(e.target.value)
+          if (!isNaN(n)) set(key, n as never)
+        }}
+        onBlur={() => {
+          const n = parseFloat(strVals[key])
+          const safe = isNaN(n) ? 0 : n
+          setStrVals(prev => ({ ...prev, [key]: String(safe) }))
+          set(key, safe as never)
+        }}
         style={{
           background: C.surface, border: `1px solid ${C.border}`,
           borderRadius: 10, padding: '9px 6px', color: C.text, fontSize: 16,
@@ -172,11 +203,12 @@ function AddExerciseSheet({
   const valid = form.name.trim() && form.muscle
 
   return (
-    <div style={{ position: 'absolute', inset: 0, zIndex: 100, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
+    <div style={{ position: 'fixed', inset: 0, zIndex: 100, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
       <div onClick={onClose} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.65)' }} />
       <div style={{
         position: 'relative', background: C.surfaceHigh,
         borderRadius: '20px 20px 0 0', padding: '20px 20px 36px', zIndex: 1,
+        maxHeight: '90dvh', overflowY: 'auto',
       }}>
         <div style={{ width: 40, height: 4, background: C.border, borderRadius: 2, margin: '0 auto 18px' }} />
         <div style={{ fontSize: 17, fontWeight: 800, color: C.text, marginBottom: 16 }}>新增訓練動作</div>
