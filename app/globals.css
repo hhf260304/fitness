@@ -13,8 +13,8 @@
 }
 
 :root {
-  --background: #080808;
-  --foreground: #F0F0F0;
+  --background: #FFFFFF;
+  --foreground: #121212;
   --radius: 0.625rem;
 }
 
@@ -27,8 +27,8 @@
     height: 100%;
   }
   body {
-    background: #080808;
-    color: #F0F0F0;
+    background: #FFFFFF;
+    color: #121212;
     font-family: var(--font-space-grotesk), 'Space Grotesk', sans-serif;
     -webkit-font-smoothing: antialiased;
     overflow: hidden;
