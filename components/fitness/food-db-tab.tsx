@@ -23,14 +23,22 @@ function FoodFormSheet({ initial, onSave, onClose, title }: {
   const set = (k: keyof typeof form, v: string) => setForm(prev => ({ ...prev, [k]: v }))
   const valid = form.name.trim() && form.calories && parseFloat(form.servingSize) > 0
 
+  const sanitizeNum = (v: string) => {
+    let s = v.replace(/[^\d.]/g, '')
+    const dot = s.indexOf('.')
+    if (dot !== -1) s = s.slice(0, dot + 1) + s.slice(dot + 1).replace(/\./g, '')
+    s = s.replace(/^0+(\d)/, '$1')
+    return s
+  }
+
   const numInp = (field: keyof typeof form, label: string, color: string) => (
     <div key={field} style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
       <label style={{ fontSize: 10, color, fontWeight: 700, letterSpacing: '0.4px', textTransform: 'uppercase' as const }}>
         {label}
       </label>
       <input
-        type="number" step="any" value={form[field]}
-        onChange={e => set(field, e.target.value)}
+        type="text" inputMode="decimal" value={form[field]}
+        onChange={e => set(field, sanitizeNum(e.target.value))}
         placeholder=""
         style={{
           background: C.surface, border: `1px solid ${C.border}`,
