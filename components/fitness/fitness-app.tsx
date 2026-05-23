@@ -159,7 +159,7 @@ export function FitnessApp({ initialSessions, initialFoodDb, initialGoals, initi
   const reorderSessions = async (ids: number[]) => {
     // 樂觀更新：立即重排 UI
     const map = new Map(sessions.map(s => [s.id, s]))
-    setSessions(ids.map(id => map.get(id)!).filter(Boolean))
+    setSessions(ids.map(id => map.get(id)).filter((s): s is Session => s !== undefined))
     await sessionActions.reorderSessions(ids)
   }
 
