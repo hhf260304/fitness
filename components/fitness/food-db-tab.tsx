@@ -31,7 +31,7 @@ function FoodFormSheet({ initial, onSave, onClose, title }: {
       <input
         type="number" step="any" value={form[field]}
         onChange={e => set(field, e.target.value)}
-        placeholder="0"
+        placeholder=""
         style={{
           background: C.surface, border: `1px solid ${C.border}`,
           borderRadius: 10, padding: '9px 6px', color: C.text, fontSize: 15,
@@ -44,14 +44,21 @@ function FoodFormSheet({ initial, onSave, onClose, title }: {
   )
 
   return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 100, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
-      <div onClick={onClose} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.65)' }} />
+    <div style={{ position: 'fixed', inset: 0, zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
+      <div onClick={onClose} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.72)' }} />
       <div style={{
         position: 'relative', background: C.surfaceHigh,
-        borderRadius: '20px 20px 0 0', padding: '20px 20px 36px', zIndex: 1,
+        borderRadius: 20, padding: '20px 20px 24px', zIndex: 1,
+        width: '100%', boxShadow: '0 24px 48px rgba(0,0,0,0.5)',
       }}>
-        <div style={{ width: 40, height: 4, background: C.border, borderRadius: 2, margin: '0 auto 18px' }} />
-        <div style={{ fontSize: 17, fontWeight: 800, color: C.text, marginBottom: 16 }}>{title}</div>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+          <div style={{ fontSize: 17, fontWeight: 800, color: C.text }}>{title}</div>
+          <button onClick={onClose} style={{
+            background: C.border, border: 'none', borderRadius: '50%',
+            width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
+            cursor: 'pointer', color: C.textSec, fontSize: 16, lineHeight: 1,
+          }}>×</button>
+        </div>
 
         <div style={{ marginBottom: 12 }}>
           <label style={{ fontSize: 11, color: C.textSec, fontWeight: 700, letterSpacing: '0.5px', display: 'block', marginBottom: 6 }}>食物名稱</label>
