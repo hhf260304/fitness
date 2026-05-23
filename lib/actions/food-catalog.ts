@@ -10,8 +10,8 @@ function toFood(row: typeof foodCatalog.$inferSelect): Food {
   return {
     id:          row.id,
     name:        row.name,
-    servingSize: row.servingSize,
-    calories:    row.calories,
+    servingSize: Number(row.servingSize),
+    calories:    Number(row.calories),
     protein:     Number(row.protein),
     fat:         Number(row.fat),
     carbs:       Number(row.carbs),
@@ -31,8 +31,8 @@ export async function createFood(data: Omit<Food, 'id'>): Promise<Food> {
     .values({
       userId,
       name:        data.name,
-      servingSize: Math.round(data.servingSize ?? 100),
-      calories:    data.calories,
+      servingSize: String(data.servingSize ?? 100),
+      calories:    String(data.calories),
       protein:     String(data.protein),
       fat:         String(data.fat),
       carbs:       String(data.carbs),
@@ -44,13 +44,13 @@ export async function createFood(data: Omit<Food, 'id'>): Promise<Food> {
 
 export async function updateFood(id: number, data: Omit<Food, 'id'>): Promise<Food> {
   const { userId } = await verifySession()
-  const servingSize = Math.round(data.servingSize ?? 100)
+  const servingSize = data.servingSize ?? 100
 
   const [updated] = await db.update(foodCatalog)
     .set({
       name:        data.name,
-      servingSize,
-      calories:    data.calories,
+      servingSize: String(servingSize),
+      calories:    String(data.calories),
       protein:     String(data.protein),
       fat:         String(data.fat),
       carbs:       String(data.carbs),

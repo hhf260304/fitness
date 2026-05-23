@@ -64,7 +64,7 @@ export function BottomTabBar({ tab, setTab }: { tab: TabId; setTab: (t: TabId) =
     <div style={{
       display: 'flex', gap: 8, flexShrink: 0,
       borderTop: `1px solid ${C.border}`,
-      background: C.surfaceHigh,
+      background: C.bg,
       padding: '6px 16px env(safe-area-inset-bottom, 20px)',
       paddingBottom: 'max(20px, env(safe-area-inset-bottom))',
     }}>

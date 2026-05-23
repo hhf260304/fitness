@@ -1,0 +1,1 @@
+ALTER TABLE "food_catalog" ALTER COLUMN "calories" SET DATA TYPE numeric(7, 1);

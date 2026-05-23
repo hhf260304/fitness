@@ -138,7 +138,7 @@ function MacroRing({ goals }: { goals: Goals }) {
             <span style={{ fontSize: 13, fontWeight: 800, color: C.text, fontVariantNumeric: 'tabular-nums' }}>
               {arc.grams}g
             </span>
-            <span style={{ fontSize: 10, color: C.textTer, width: 30, textAlign: 'right' as const }}>
+            <span style={{ fontSize: 10, color: C.textSec, width: 30, textAlign: 'right' as const }}>
               {(arc.pct * 100).toFixed(0)}%
             </span>
           </div>
@@ -149,7 +149,7 @@ function MacroRing({ goals }: { goals: Goals }) {
           <span style={{ fontSize: 13, fontWeight: 800, color: C.text, fontVariantNumeric: 'tabular-nums' }}>
             {goals.sugar}g
           </span>
-          <span style={{ fontSize: 10, color: C.textTer, width: 30, textAlign: 'right' as const }}>
+          <span style={{ fontSize: 10, color: C.textSec, width: 30, textAlign: 'right' as const }}>
             {(sugarCal / total * 100).toFixed(0)}%
           </span>
         </div>
