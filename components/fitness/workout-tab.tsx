@@ -91,7 +91,7 @@ function ExerciseEditCard({
         {label}
       </label>
       <input
-        type="number" value={strVals[key]}
+        type="number" step="any" value={strVals[key]}
         onFocus={e => e.currentTarget.select()}
         onChange={e => {
           setStrVals(prev => ({ ...prev, [key]: e.target.value }))
@@ -189,7 +189,7 @@ function AddExerciseSheet({
         {label}
       </label>
       <input
-        type="number" value={strVals[key]}
+        type="number" step="any" value={strVals[key]}
         onFocus={e => e.currentTarget.select()}
         onChange={e => {
           setStrVals(prev => ({ ...prev, [key]: e.target.value }))

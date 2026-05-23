@@ -38,15 +38,15 @@ function GoalRow({ field, label, unit, color, value, onChange }: {
             cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>−</button>
         <input
-          type="number" value={strVal}
+          type="number" step="any" value={strVal}
           onFocus={e => e.currentTarget.select()}
           onChange={e => {
             setStrVal(e.target.value)
-            const n = parseInt(e.target.value)
+            const n = parseFloat(e.target.value)
             if (!isNaN(n)) onChange(n)
           }}
           onBlur={() => {
-            const n = parseInt(strVal)
+            const n = parseFloat(strVal)
             const safe = isNaN(n) ? 0 : n
             setStrVal(String(safe))
             onChange(safe)

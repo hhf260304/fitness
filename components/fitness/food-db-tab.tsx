@@ -28,7 +28,7 @@ function FoodFormSheet({ initial, onSave, onClose, title }: {
         {label}
       </label>
       <input
-        type="number" value={form[field]}
+        type="number" step="any" value={form[field]}
         onChange={e => set(field, e.target.value)}
         placeholder="0"
         style={{
