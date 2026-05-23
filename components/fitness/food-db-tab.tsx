@@ -43,7 +43,7 @@ function FoodFormSheet({ initial, onSave, onClose, title }: {
   )
 
   return (
-    <div style={{ position: 'absolute', inset: 0, zIndex: 100, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
+    <div style={{ position: 'fixed', inset: 0, zIndex: 100, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
       <div onClick={onClose} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.65)' }} />
       <div style={{
         position: 'relative', background: C.surfaceHigh,
@@ -80,11 +80,11 @@ function FoodFormSheet({ initial, onSave, onClose, title }: {
             onSave({
               id:       initial?.id || Date.now(),
               name:     form.name.trim(),
-              calories: parseInt(form.calories) || 0,
-              protein:  parseInt(form.protein)  || 0,
-              fat:      parseInt(form.fat)       || 0,
-              carbs:    parseInt(form.carbs)     || 0,
-              sugar:    parseInt(form.sugar)     || 0,
+              calories: parseFloat(form.calories) || 0,
+              protein:  parseFloat(form.protein)  || 0,
+              fat:      parseFloat(form.fat)       || 0,
+              carbs:    parseFloat(form.carbs)     || 0,
+              sugar:    parseFloat(form.sugar)     || 0,
             })
           }}
           disabled={!valid}

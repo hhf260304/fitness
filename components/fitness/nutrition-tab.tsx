@@ -150,11 +150,11 @@ function AddFoodSheet({ onAdd, onClose, foodDb }: {
     onAdd({
       id:       Date.now(),
       name:     form.name.trim(),
-      calories: parseInt(form.calories) || 0,
-      protein:  parseInt(form.protein)  || 0,
-      fat:      parseInt(form.fat)      || 0,
-      carbs:    parseInt(form.carbs)    || 0,
-      sugar:    parseInt(form.sugar)    || 0,
+      calories: parseFloat(form.calories) || 0,
+      protein:  parseFloat(form.protein)  || 0,
+      fat:      parseFloat(form.fat)      || 0,
+      carbs:    parseFloat(form.carbs)    || 0,
+      sugar:    parseFloat(form.sugar)    || 0,
     })
   }
 
