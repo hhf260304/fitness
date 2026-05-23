@@ -4,7 +4,7 @@ import type { TabId } from '@/lib/types'
 import { C } from '@/lib/fitness-constants'
 
 function DumbbellIcon({ active }: { active: boolean }) {
-  const fill = active ? '#000' : C.textSec
+  const fill = active ? '#fff' : C.textSec
   return (
     <svg width="22" height="16" viewBox="0 0 22 16" fill="none">
       <rect x="0"    y="5"   width="3.5" height="6"  rx="1.2" fill={fill}/>
@@ -17,7 +17,7 @@ function DumbbellIcon({ active }: { active: boolean }) {
 }
 
 function ForkKnifeIcon({ active }: { active: boolean }) {
-  const stroke = active ? '#000' : C.textSec
+  const stroke = active ? '#fff' : C.textSec
   return (
     <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
       <circle cx="10" cy="10" r="8.5"  stroke={stroke} strokeWidth="1.5"/>
@@ -31,7 +31,7 @@ function ForkKnifeIcon({ active }: { active: boolean }) {
 }
 
 function FoodDbIcon({ active }: { active: boolean }) {
-  const stroke = active ? '#000' : C.textSec
+  const stroke = active ? '#fff' : C.textSec
   return (
     <svg width="20" height="18" viewBox="0 0 20 18" fill="none">
       <ellipse cx="10" cy="4" rx="8" ry="3" stroke={stroke} strokeWidth="1.5"/>
@@ -42,7 +42,7 @@ function FoodDbIcon({ active }: { active: boolean }) {
 }
 
 function SettingsIcon({ active }: { active: boolean }) {
-  const stroke = active ? '#000' : C.textSec
+  const stroke = active ? '#fff' : C.textSec
   return (
     <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
       <circle cx="10" cy="10" r="2.8" stroke={stroke} strokeWidth="1.5"/>
@@ -78,10 +78,12 @@ export function BottomTabBar({ tab, setTab }: { tab: TabId; setTab: (t: TabId) =
             border: 'none', borderRadius: 13, cursor: 'pointer',
             transition: 'background 0.18s',
           }}>
-            <Icon active={active} />
+            <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 20 }}>
+              <Icon active={active} />
+            </span>
             <span style={{
               fontSize: 11, fontWeight: 700, letterSpacing: '0.3px',
-              color: active ? '#000' : C.textSec,
+              color: active ? '#fff' : C.textSec,
             }}>{label}</span>
           </button>
         )

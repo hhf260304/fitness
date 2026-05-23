@@ -12,15 +12,16 @@ function FoodFormSheet({ initial, onSave, onClose, title }: {
   title: string
 }) {
   const [form, setForm] = useState({
-    name:     initial?.name     ?? '',
-    calories: initial ? String(initial.calories) : '',
-    protein:  initial ? String(initial.protein)  : '',
-    fat:      initial ? String(initial.fat)       : '',
-    carbs:    initial ? String(initial.carbs)     : '',
-    sugar:    initial ? String(initial.sugar)     : '',
+    name:        initial?.name                    ?? '',
+    servingSize: initial ? String(initial.servingSize) : '100',
+    calories:    initial ? String(initial.calories)    : '',
+    protein:     initial ? String(initial.protein)     : '',
+    fat:         initial ? String(initial.fat)          : '',
+    carbs:       initial ? String(initial.carbs)        : '',
+    sugar:       initial ? String(initial.sugar)        : '',
   })
   const set = (k: keyof typeof form, v: string) => setForm(prev => ({ ...prev, [k]: v }))
-  const valid = form.name.trim() && form.calories
+  const valid = form.name.trim() && form.calories && parseFloat(form.servingSize) > 0
 
   const numInp = (field: keyof typeof form, label: string, color: string) => (
     <div key={field} style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
@@ -52,11 +53,11 @@ function FoodFormSheet({ initial, onSave, onClose, title }: {
         <div style={{ width: 40, height: 4, background: C.border, borderRadius: 2, margin: '0 auto 18px' }} />
         <div style={{ fontSize: 17, fontWeight: 800, color: C.text, marginBottom: 16 }}>{title}</div>
 
-        <div style={{ marginBottom: 14 }}>
+        <div style={{ marginBottom: 12 }}>
           <label style={{ fontSize: 11, color: C.textSec, fontWeight: 700, letterSpacing: '0.5px', display: 'block', marginBottom: 6 }}>食物名稱</label>
           <input
             value={form.name} onChange={e => set('name', e.target.value)}
-            placeholder="例：雞胸肉 100g、全脂牛奶 250ml…"
+            placeholder="例：雞胸肉、全脂牛奶…"
             autoFocus
             style={{
               width: '100%', background: C.surface, border: `1px solid ${C.border}`,
@@ -64,6 +65,26 @@ function FoodFormSheet({ initial, onSave, onClose, title }: {
               outline: 'none', boxSizing: 'border-box' as const,
             }}
           />
+        </div>
+
+        <div style={{ marginBottom: 14 }}>
+          <label style={{ fontSize: 11, color: C.textSec, fontWeight: 700, letterSpacing: '0.5px', display: 'block', marginBottom: 6 }}>
+            基準份量（g / ml）
+          </label>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <input
+              type="number" step="1" min="1" value={form.servingSize}
+              onChange={e => set('servingSize', e.target.value)}
+              placeholder="100"
+              style={{
+                flex: 1, background: C.surface, border: `1px solid ${C.border}`,
+                borderRadius: 10, padding: '9px 14px', color: C.text, fontSize: 15,
+                fontWeight: 700, outline: 'none', fontVariantNumeric: 'tabular-nums',
+              }}
+            />
+            <span style={{ fontSize: 13, color: C.textSec, fontWeight: 600, flexShrink: 0 }}>g / ml</span>
+          </div>
+          <div style={{ fontSize: 10, color: C.textTer, marginTop: 4 }}>以下營養數值對應此份量</div>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 20 }}>
@@ -78,13 +99,14 @@ function FoodFormSheet({ initial, onSave, onClose, title }: {
           onClick={() => {
             if (!valid) return
             onSave({
-              id:       initial?.id || Date.now(),
-              name:     form.name.trim(),
-              calories: parseFloat(form.calories) || 0,
-              protein:  parseFloat(form.protein)  || 0,
-              fat:      parseFloat(form.fat)       || 0,
-              carbs:    parseFloat(form.carbs)     || 0,
-              sugar:    parseFloat(form.sugar)     || 0,
+              id:          initial?.id || Date.now(),
+              name:        form.name.trim(),
+              servingSize: parseFloat(form.servingSize) || 100,
+              calories:    parseFloat(form.calories) || 0,
+              protein:     parseFloat(form.protein)  || 0,
+              fat:         parseFloat(form.fat)       || 0,
+              carbs:       parseFloat(form.carbs)     || 0,
+              sugar:       parseFloat(form.sugar)     || 0,
             })
           }}
           disabled={!valid}
@@ -115,6 +137,7 @@ function FoodDbCard({ food, onEdit, onDelete }: {
           overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
         }}>{food.name}</div>
         <div style={{ display: 'flex', gap: 8, fontSize: 11, fontVariantNumeric: 'tabular-nums', flexWrap: 'wrap' as const }}>
+          <span style={{ color: C.textSec, fontWeight: 600 }}>每 {food.servingSize ?? 100}g/ml</span>
           <span style={{ color: C.orange, fontWeight: 800 }}>{food.calories} kcal</span>
           <span style={{ color: MACRO_COLORS.protein }}>蛋白 {food.protein}g</span>
           <span style={{ color: MACRO_COLORS.fat     }}>脂肪 {food.fat}g</span>

@@ -9,13 +9,15 @@ import { verifySession } from '@/lib/session'
 
 function toFood(row: typeof mealFoods.$inferSelect): Food {
   return {
-    id:       row.id,
-    name:     row.name,
-    calories: row.calories,
-    protein:  Number(row.protein),
-    fat:      Number(row.fat),
-    carbs:    Number(row.carbs),
-    sugar:    Number(row.sugar),
+    id:            row.id,
+    name:          row.name,
+    catalogFoodId: row.catalogFoodId ?? undefined,
+    amountG:       row.amountG != null ? Number(row.amountG) : undefined,
+    calories:      row.calories,
+    protein:       Number(row.protein),
+    fat:           Number(row.fat),
+    carbs:         Number(row.carbs),
+    sugar:         Number(row.sugar),
   }
 }
 
@@ -78,13 +80,15 @@ export async function createMeal(date: string, data: Omit<Meal, 'id'>): Promise<
   if (data.foods.length > 0) {
     await db.insert(mealFoods).values(
       data.foods.map(f => ({
-        mealId:   inserted.id,
-        name:     f.name,
-        calories: f.calories,
-        protein:  String(f.protein),
-        fat:      String(f.fat),
-        carbs:    String(f.carbs),
-        sugar:    String(f.sugar),
+        mealId:        inserted.id,
+        catalogFoodId: f.catalogFoodId ?? null,
+        amountG:       f.amountG != null ? String(f.amountG) : null,
+        name:          f.name,
+        calories:      f.calories,
+        protein:       String(f.protein),
+        fat:           String(f.fat),
+        carbs:         String(f.carbs),
+        sugar:         String(f.sugar),
       }))
     )
   }
@@ -102,13 +106,15 @@ export async function updateMeal(id: number, data: Omit<Meal, 'id'>): Promise<Me
   if (data.foods.length > 0) {
     await db.insert(mealFoods).values(
       data.foods.map(f => ({
-        mealId:   id,
-        name:     f.name,
-        calories: f.calories,
-        protein:  String(f.protein),
-        fat:      String(f.fat),
-        carbs:    String(f.carbs),
-        sugar:    String(f.sugar),
+        mealId:        id,
+        catalogFoodId: f.catalogFoodId ?? null,
+        amountG:       f.amountG != null ? String(f.amountG) : null,
+        name:          f.name,
+        calories:      f.calories,
+        protein:       String(f.protein),
+        fat:           String(f.fat),
+        carbs:         String(f.carbs),
+        sugar:         String(f.sugar),
       }))
     )
   }

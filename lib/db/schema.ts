@@ -29,14 +29,15 @@ export const exercises = pgTable('exercises', {
 })
 
 export const foodCatalog = pgTable('food_catalog', {
-  id:       serial('id').primaryKey(),
-  userId:   integer('user_id').references(() => users.id, { onDelete: 'cascade' }),
-  name:     text('name').notNull(),
-  calories: integer('calories').notNull(),
-  protein:  numeric('protein', { precision: 6, scale: 1 }).notNull(),
-  fat:      numeric('fat',     { precision: 6, scale: 1 }).notNull(),
-  carbs:    numeric('carbs',   { precision: 6, scale: 1 }).notNull(),
-  sugar:    numeric('sugar',   { precision: 6, scale: 1 }).notNull(),
+  id:          serial('id').primaryKey(),
+  userId:      integer('user_id').references(() => users.id, { onDelete: 'cascade' }),
+  name:        text('name').notNull(),
+  servingSize: integer('serving_size').notNull().default(100),
+  calories:    integer('calories').notNull(),
+  protein:     numeric('protein', { precision: 6, scale: 1 }).notNull(),
+  fat:         numeric('fat',     { precision: 6, scale: 1 }).notNull(),
+  carbs:       numeric('carbs',   { precision: 6, scale: 1 }).notNull(),
+  sugar:       numeric('sugar',   { precision: 6, scale: 1 }).notNull(),
 }, (t) => [
   unique('food_catalog_user_name_unique').on(t.userId, t.name),
 ])
@@ -50,14 +51,16 @@ export const meals = pgTable('meals', {
 })
 
 export const mealFoods = pgTable('meal_foods', {
-  id:       serial('id').primaryKey(),
-  mealId:   integer('meal_id').notNull().references(() => meals.id, { onDelete: 'cascade' }),
-  name:     text('name').notNull(),
-  calories: integer('calories').notNull(),
-  protein:  numeric('protein', { precision: 6, scale: 1 }).notNull(),
-  fat:      numeric('fat',     { precision: 6, scale: 1 }).notNull(),
-  carbs:    numeric('carbs',   { precision: 6, scale: 1 }).notNull(),
-  sugar:    numeric('sugar',   { precision: 6, scale: 1 }).notNull(),
+  id:            serial('id').primaryKey(),
+  mealId:        integer('meal_id').notNull().references(() => meals.id, { onDelete: 'cascade' }),
+  catalogFoodId: integer('catalog_food_id').references(() => foodCatalog.id, { onDelete: 'set null' }),
+  amountG:       numeric('amount_g', { precision: 8, scale: 1 }),
+  name:          text('name').notNull(),
+  calories:      integer('calories').notNull(),
+  protein:       numeric('protein', { precision: 6, scale: 1 }).notNull(),
+  fat:           numeric('fat',     { precision: 6, scale: 1 }).notNull(),
+  carbs:         numeric('carbs',   { precision: 6, scale: 1 }).notNull(),
+  sugar:         numeric('sugar',   { precision: 6, scale: 1 }).notNull(),
 })
 
 export const goals = pgTable('goals', {

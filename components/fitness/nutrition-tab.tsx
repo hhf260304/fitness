@@ -80,8 +80,8 @@ function MacroSummary({ totals, goals }: {
 }
 
 // ── FoodRow ───────────────────────────────────────────────────
-function FoodRow({ food, isEditing, onDelete }: {
-  food: Food; isEditing: boolean; onDelete: () => void
+function FoodRow({ food, isEditing, onEdit, onDelete }: {
+  food: Food; isEditing: boolean; onEdit: () => void; onDelete: () => void
 }) {
   return (
     <div style={{
@@ -109,12 +109,187 @@ function FoodRow({ food, isEditing, onDelete }: {
         </span>
         <span style={{ fontSize: 10, color: C.textSec, fontWeight: 500 }}>kcal</span>
         {isEditing && (
-          <button onClick={onDelete} style={{
-            background: C.red + '18', border: 'none', cursor: 'pointer',
-            color: C.red, fontSize: 15, lineHeight: 1, padding: '3px 7px',
-            borderRadius: 6, display: 'flex', alignItems: 'center',
-          }}>×</button>
+          <>
+            <button onClick={onEdit} style={{
+              background: C.surfaceHigh, border: 'none', cursor: 'pointer',
+              color: C.textSec, fontSize: 11, fontWeight: 700, padding: '3px 7px',
+              borderRadius: 6,
+            }}>編輯</button>
+            <button onClick={onDelete} style={{
+              background: C.red + '18', border: 'none', cursor: 'pointer',
+              color: C.red, fontSize: 15, lineHeight: 1, padding: '3px 7px',
+              borderRadius: 6, display: 'flex', alignItems: 'center',
+            }}>×</button>
+          </>
         )}
+      </div>
+    </div>
+  )
+}
+
+// ── EditFoodSheet ─────────────────────────────────────────────
+function EditFoodSheet({ food, foodDb, onSave, onClose }: {
+  food: Food
+  foodDb: Food[]
+  onSave: (f: Food) => void
+  onClose: () => void
+}) {
+  const catalogFood = food.catalogFoodId ? foodDb.find(f => f.id === food.catalogFoodId) : null
+  const base        = catalogFood?.servingSize ?? 100
+
+  const [amount, setAmount] = useState(String(food.amountG ?? ''))
+  const [form, setForm]     = useState({
+    name:     food.name,
+    calories: String(food.calories),
+    protein:  String(food.protein),
+    fat:      String(food.fat),
+    carbs:    String(food.carbs),
+    sugar:    String(food.sugar),
+  })
+  const setF = (k: keyof typeof form, v: string) => setForm(p => ({ ...p, [k]: v }))
+
+  const amt  = parseFloat(amount) || 0
+  const calc = (catalogFood && amt > 0) ? {
+    calories: Math.round(catalogFood.calories * amt / base),
+    protein:  Math.round(catalogFood.protein  * amt / base * 10) / 10,
+    fat:      Math.round(catalogFood.fat      * amt / base * 10) / 10,
+    carbs:    Math.round(catalogFood.carbs    * amt / base * 10) / 10,
+    sugar:    Math.round(catalogFood.sugar    * amt / base * 10) / 10,
+  } : null
+
+  const handleSave = () => {
+    if (catalogFood) {
+      if (!calc) return
+      onSave({ ...food, name: `${catalogFood.name} ${amt}g`, amountG: amt, ...calc })
+    } else {
+      if (!form.name.trim() || !form.calories) return
+      onSave({
+        ...food,
+        name:     form.name.trim(),
+        calories: parseFloat(form.calories) || 0,
+        protein:  parseFloat(form.protein)  || 0,
+        fat:      parseFloat(form.fat)      || 0,
+        carbs:    parseFloat(form.carbs)    || 0,
+        sugar:    parseFloat(form.sugar)    || 0,
+      })
+    }
+  }
+
+  const valid = catalogFood ? amt > 0 : (form.name.trim() && form.calories)
+
+  return (
+    <div style={{ position: 'fixed', inset: 0, zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
+      <div onClick={onClose} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.72)' }} />
+      <div style={{
+        position: 'relative', background: C.surfaceHigh, borderRadius: 20,
+        padding: '20px 20px 24px', zIndex: 1, width: '100%',
+        boxShadow: '0 24px 48px rgba(0,0,0,0.5)',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+          <div style={{ fontSize: 17, fontWeight: 800, color: C.text }}>編輯食物</div>
+          <button onClick={onClose} style={{
+            background: C.border, border: 'none', borderRadius: '50%',
+            width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
+            cursor: 'pointer', color: C.textSec, fontSize: 16, lineHeight: 1,
+          }}>×</button>
+        </div>
+
+        {catalogFood ? (
+          <>
+            <div style={{
+              background: C.surface, border: `1px solid ${C.border}`,
+              borderRadius: 12, padding: '12px 14px', marginBottom: 16,
+            }}>
+              <div style={{ fontSize: 14, fontWeight: 700, color: C.text, marginBottom: 4 }}>{catalogFood.name}</div>
+              <div style={{ fontSize: 11, color: C.textSec }}>
+                每 {base}g/ml：{catalogFood.calories} kcal・蛋白 {catalogFood.protein}g・脂肪 {catalogFood.fat}g・碳水 {catalogFood.carbs}g
+              </div>
+            </div>
+
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ fontSize: 11, color: C.textSec, fontWeight: 700, letterSpacing: '0.5px', display: 'block', marginBottom: 8 }}>食用量</label>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <input
+                  type="number" step="1" min="1" value={amount}
+                  onChange={e => setAmount(e.target.value)}
+                  autoFocus
+                  style={{
+                    flex: 1, background: C.surface, border: `1px solid ${C.border}`,
+                    borderRadius: 10, padding: '11px 14px', color: C.text, fontSize: 22,
+                    fontWeight: 800, outline: 'none', textAlign: 'center' as const,
+                    fontVariantNumeric: 'tabular-nums',
+                  }}
+                />
+                <span style={{ fontSize: 15, color: C.textSec, fontWeight: 600, flexShrink: 0 }}>g / ml</span>
+              </div>
+            </div>
+
+            {calc && (
+              <div style={{
+                background: C.orange + '12', border: `1px solid ${C.orange}30`,
+                borderRadius: 12, padding: '12px 14px', marginBottom: 16,
+              }}>
+                <div style={{ fontSize: 11, color: C.textSec, fontWeight: 600, marginBottom: 8 }}>計算結果</div>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: 4, marginBottom: 6 }}>
+                  <span style={{ fontSize: 26, fontWeight: 900, color: C.orange, fontVariantNumeric: 'tabular-nums' }}>{calc.calories}</span>
+                  <span style={{ fontSize: 12, color: C.textSec }}>kcal</span>
+                </div>
+                <div style={{ display: 'flex', gap: 12, fontSize: 12, fontVariantNumeric: 'tabular-nums', flexWrap: 'wrap' as const }}>
+                  <span style={{ color: MACRO_COLORS.protein, fontWeight: 700 }}>蛋白 {calc.protein}g</span>
+                  <span style={{ color: MACRO_COLORS.fat,     fontWeight: 700 }}>脂肪 {calc.fat}g</span>
+                  <span style={{ color: MACRO_COLORS.carbs,   fontWeight: 700 }}>碳水 {calc.carbs}g</span>
+                  <span style={{ color: MACRO_COLORS.sugar,   fontWeight: 700 }}>糖 {calc.sugar}g</span>
+                </div>
+              </div>
+            )}
+          </>
+        ) : (
+          <>
+            <div style={{ marginBottom: 12 }}>
+              <label style={{ fontSize: 11, color: C.textSec, fontWeight: 700, letterSpacing: '0.5px', display: 'block', marginBottom: 6 }}>食物名稱</label>
+              <input
+                value={form.name} onChange={e => setF('name', e.target.value)} autoFocus
+                style={{
+                  width: '100%', background: C.surface, border: `1px solid ${C.border}`,
+                  borderRadius: 10, padding: '11px 14px', color: C.text, fontSize: 14,
+                  outline: 'none', boxSizing: 'border-box' as const,
+                }}
+              />
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 16 }}>
+              {([
+                ['calories', '熱量 kcal', C.orange],
+                ['protein',  '蛋白質 g',  MACRO_COLORS.protein],
+                ['fat',      '脂肪 g',    MACRO_COLORS.fat],
+                ['carbs',    '碳水 g',    MACRO_COLORS.carbs],
+                ['sugar',    '糖 g',      MACRO_COLORS.sugar],
+              ] as const).map(([field, label, color]) => (
+                <div key={field} style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+                  <label style={{ fontSize: 10, color, fontWeight: 700, letterSpacing: '0.4px', textTransform: 'uppercase' as const }}>{label}</label>
+                  <input
+                    type="number" step="any" value={form[field]}
+                    onChange={e => setF(field, e.target.value)}
+                    placeholder="0"
+                    style={{
+                      background: C.surface, border: `1px solid ${C.border}`,
+                      borderRadius: 10, padding: '9px 6px', color: C.text, fontSize: 15,
+                      fontWeight: 800, outline: 'none', width: '100%',
+                      textAlign: 'center' as const, fontVariantNumeric: 'tabular-nums',
+                      boxSizing: 'border-box' as const,
+                    }}
+                  />
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+
+        <button onClick={handleSave} disabled={!valid} style={{
+          width: '100%', background: valid ? C.orange : C.border,
+          color: valid ? '#fff' : C.textSec, border: 'none',
+          borderRadius: 12, padding: '13px', fontSize: 15, fontWeight: 800,
+          cursor: valid ? 'pointer' : 'not-allowed', transition: 'background 0.2s',
+        }}>儲存</button>
       </div>
     </div>
   )
@@ -126,26 +301,41 @@ function AddFoodSheet({ onAdd, onClose, foodDb }: {
   onClose: () => void
   foodDb: Food[]
 }) {
-  const [mode, setMode]     = useState<'db' | 'manual'>(foodDb.length > 0 ? 'db' : 'manual')
-  const [search, setSearch] = useState('')
-  const [form, setForm]     = useState({
+  const [mode, setMode]         = useState<'db' | 'manual'>(foodDb.length > 0 ? 'db' : 'manual')
+  const [search, setSearch]     = useState('')
+  const [selected, setSelected] = useState<Food | null>(null)
+  const [amount, setAmount]     = useState('')
+  const [form, setForm]         = useState({
     name: '', calories: '', protein: '', fat: '', carbs: '', sugar: '',
   })
   const set = (k: keyof typeof form, v: string) => setForm(prev => ({ ...prev, [k]: v }))
 
-  const applyDbItem = (food: Food) => {
-    setForm({
-      name:     food.name,
-      calories: String(food.calories),
-      protein:  String(food.protein),
-      fat:      String(food.fat),
-      carbs:    String(food.carbs),
-      sugar:    String(food.sugar),
+  const amt = parseFloat(amount) || 0
+  const base = selected?.servingSize ?? 100
+  const calc = (selected && amt > 0) ? {
+    calories: Math.round(selected.calories * amt / base),
+    protein:  Math.round(selected.protein  * amt / base * 10) / 10,
+    fat:      Math.round(selected.fat      * amt / base * 10) / 10,
+    carbs:    Math.round(selected.carbs    * amt / base * 10) / 10,
+    sugar:    Math.round(selected.sugar    * amt / base * 10) / 10,
+  } : null
+
+  const handleAddFromDb = () => {
+    if (!selected || !calc) return
+    onAdd({
+      id:            Date.now(),
+      name:          `${selected.name} ${amt}g`,
+      catalogFoodId: selected.id,
+      amountG:       amt,
+      calories:      calc.calories,
+      protein:       calc.protein,
+      fat:           calc.fat,
+      carbs:         calc.carbs,
+      sugar:         calc.sugar,
     })
-    setMode('manual')
   }
 
-  const handleAdd = () => {
+  const handleAddManual = () => {
     if (!form.name.trim() || !form.calories) return
     onAdd({
       id:       Date.now(),
@@ -178,8 +368,9 @@ function AddFoodSheet({ onAdd, onClose, foodDb }: {
     </div>
   )
 
-  const valid    = form.name.trim() && form.calories
-  const filtered = foodDb.filter(f => f.name.toLowerCase().includes(search.toLowerCase()))
+  const manualValid = form.name.trim() && form.calories
+  const dbValid     = selected && amt > 0
+  const filtered    = foodDb.filter(f => f.name.toLowerCase().includes(search.toLowerCase()))
 
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
@@ -191,7 +382,15 @@ function AddFoodSheet({ onAdd, onClose, foodDb }: {
         boxShadow: '0 24px 48px rgba(0,0,0,0.5)',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-          <div style={{ fontSize: 17, fontWeight: 800, color: C.text }}>新增食物</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            {mode === 'db' && selected && (
+              <button onClick={() => setSelected(null)} style={{
+                background: C.surface, border: 'none', borderRadius: 8,
+                padding: '4px 8px', cursor: 'pointer', color: C.textSec, fontSize: 13, lineHeight: 1,
+              }}>←</button>
+            )}
+            <div style={{ fontSize: 17, fontWeight: 800, color: C.text }}>新增食物</div>
+          </div>
           <button onClick={onClose} style={{
             background: C.border, border: 'none', borderRadius: '50%',
             width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -199,7 +398,7 @@ function AddFoodSheet({ onAdd, onClose, foodDb }: {
           }}>×</button>
         </div>
 
-        {foodDb.length > 0 && (
+        {foodDb.length > 0 && !selected && (
           <div style={{ display: 'flex', gap: 6, marginBottom: 14, background: C.surface, borderRadius: 10, padding: 4 }}>
             {(['db', 'manual'] as const).map(m => (
               <button key={m} onClick={() => setMode(m)} style={{
@@ -212,7 +411,8 @@ function AddFoodSheet({ onAdd, onClose, foodDb }: {
           </div>
         )}
 
-        {mode === 'db' && (
+        {/* 食物庫搜尋清單 */}
+        {mode === 'db' && !selected && (
           <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
             <div style={{
               display: 'flex', alignItems: 'center', gap: 8,
@@ -226,24 +426,21 @@ function AddFoodSheet({ onAdd, onClose, foodDb }: {
               <input
                 value={search} onChange={e => setSearch(e.target.value)}
                 placeholder="搜尋食物庫…"
-                style={{
-                  flex: 1, background: 'none', border: 'none', outline: 'none',
-                  color: C.text, fontSize: 13,
-                }}
+                style={{ flex: 1, background: 'none', border: 'none', outline: 'none', color: C.text, fontSize: 13 }}
               />
             </div>
             <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 6 }}>
               {filtered.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '24px', fontSize: 13, color: C.textTer }}>找不到符合的食物</div>
               ) : filtered.map(food => (
-                <button key={food.id} onClick={() => applyDbItem(food)} style={{
+                <button key={food.id} onClick={() => { setSelected(food); setAmount('') }} style={{
                   background: C.surface, border: `1px solid ${C.border}`,
                   borderRadius: 12, padding: '10px 14px', cursor: 'pointer',
                   textAlign: 'left' as const,
                 }}>
                   <div style={{ fontSize: 13, fontWeight: 700, color: C.text, marginBottom: 3 }}>{food.name}</div>
                   <div style={{ display: 'flex', gap: 8, fontSize: 11, fontVariantNumeric: 'tabular-nums', flexWrap: 'wrap' as const }}>
-                    <span style={{ color: C.orange, fontWeight: 800 }}>{food.calories} kcal</span>
+                    <span style={{ color: C.orange, fontWeight: 800 }}>{food.calories} kcal／份</span>
                     <span style={{ color: MACRO_COLORS.protein }}>蛋白 {food.protein}g</span>
                     <span style={{ color: MACRO_COLORS.fat }}>脂肪 {food.fat}g</span>
                     <span style={{ color: MACRO_COLORS.carbs }}>碳水 {food.carbs}g</span>
@@ -254,6 +451,67 @@ function AddFoodSheet({ onAdd, onClose, foodDb }: {
           </div>
         )}
 
+        {/* 重量輸入 + 自動計算 */}
+        {mode === 'db' && selected && (
+          <div>
+            <div style={{
+              background: C.surface, border: `1px solid ${C.border}`,
+              borderRadius: 12, padding: '12px 14px', marginBottom: 16,
+            }}>
+              <div style={{ fontSize: 14, fontWeight: 700, color: C.text, marginBottom: 4 }}>{selected.name}</div>
+              <div style={{ fontSize: 11, color: C.textSec }}>
+                每 {selected.servingSize}g/ml：{selected.calories} kcal・蛋白 {selected.protein}g・脂肪 {selected.fat}g・碳水 {selected.carbs}g
+              </div>
+            </div>
+
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ fontSize: 11, color: C.textSec, fontWeight: 700, letterSpacing: '0.5px', display: 'block', marginBottom: 8 }}>食用量</label>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <input
+                  type="number" step="1" min="1" value={amount}
+                  onChange={e => setAmount(e.target.value)}
+                  placeholder="0"
+                  autoFocus
+                  style={{
+                    flex: 1, background: C.surface, border: `1px solid ${C.border}`,
+                    borderRadius: 10, padding: '11px 14px', color: C.text, fontSize: 22,
+                    fontWeight: 800, outline: 'none', textAlign: 'center' as const,
+                    fontVariantNumeric: 'tabular-nums',
+                  }}
+                />
+                <span style={{ fontSize: 15, color: C.textSec, fontWeight: 600, flexShrink: 0 }}>g / ml</span>
+              </div>
+            </div>
+
+            {calc && (
+              <div style={{
+                background: C.orange + '12', border: `1px solid ${C.orange}30`,
+                borderRadius: 12, padding: '12px 14px', marginBottom: 16,
+              }}>
+                <div style={{ fontSize: 11, color: C.textSec, fontWeight: 600, marginBottom: 8 }}>計算結果</div>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: 4, marginBottom: 6 }}>
+                  <span style={{ fontSize: 26, fontWeight: 900, color: C.orange, fontVariantNumeric: 'tabular-nums' }}>{calc.calories}</span>
+                  <span style={{ fontSize: 12, color: C.textSec }}>kcal</span>
+                </div>
+                <div style={{ display: 'flex', gap: 12, fontSize: 12, fontVariantNumeric: 'tabular-nums', flexWrap: 'wrap' as const }}>
+                  <span style={{ color: MACRO_COLORS.protein, fontWeight: 700 }}>蛋白 {calc.protein}g</span>
+                  <span style={{ color: MACRO_COLORS.fat,     fontWeight: 700 }}>脂肪 {calc.fat}g</span>
+                  <span style={{ color: MACRO_COLORS.carbs,   fontWeight: 700 }}>碳水 {calc.carbs}g</span>
+                  <span style={{ color: MACRO_COLORS.sugar,   fontWeight: 700 }}>糖 {calc.sugar}g</span>
+                </div>
+              </div>
+            )}
+
+            <button onClick={handleAddFromDb} disabled={!dbValid} style={{
+              width: '100%', background: dbValid ? C.orange : C.border,
+              color: dbValid ? '#fff' : C.textSec, border: 'none',
+              borderRadius: 12, padding: '13px', fontSize: 15, fontWeight: 800,
+              cursor: dbValid ? 'pointer' : 'not-allowed', transition: 'background 0.2s',
+            }}>新增食物</button>
+          </div>
+        )}
+
+        {/* 手動輸入 */}
         {mode === 'manual' && (
           <div>
             <div style={{ marginBottom: 12 }}>
@@ -275,11 +533,11 @@ function AddFoodSheet({ onAdd, onClose, foodDb }: {
               {numInp('carbs',    '碳水 g',    MACRO_COLORS.carbs)}
               {numInp('sugar',    '糖 g',      MACRO_COLORS.sugar)}
             </div>
-            <button onClick={handleAdd} disabled={!valid} style={{
-              width: '100%', background: valid ? C.orange : C.border,
-              color: valid ? '#fff' : C.textSec, border: 'none',
+            <button onClick={handleAddManual} disabled={!manualValid} style={{
+              width: '100%', background: manualValid ? C.orange : C.border,
+              color: manualValid ? '#fff' : C.textSec, border: 'none',
               borderRadius: 12, padding: '13px', fontSize: 15, fontWeight: 800,
-              cursor: valid ? 'pointer' : 'not-allowed', transition: 'background 0.2s',
+              cursor: manualValid ? 'pointer' : 'not-allowed', transition: 'background 0.2s',
             }}>新增食物</button>
           </div>
         )}
@@ -288,15 +546,17 @@ function AddFoodSheet({ onAdd, onClose, foodDb }: {
   )
 }
 
-// ── AddMealSheet ──────────────────────────────────────────────
-function AddMealSheet({ onAdd, onClose }: {
-  onAdd: (m: Meal) => void
+// ── MealSheet ─────────────────────────────────────────────────
+function MealSheet({ initial, onSave, onClose }: {
+  initial?: Pick<Meal, 'name' | 'time'>
+  onSave: (name: string, time: string) => void
   onClose: () => void
 }) {
-  const [name, setName] = useState('')
-  const [time, setTime] = useState('')
+  const [name, setName] = useState(initial?.name ?? '')
+  const [time, setTime] = useState(initial?.time === '—' ? '' : (initial?.time ?? ''))
   const presets = ['早餐', '上午點心', '午餐', '下午點心', '晚餐', '宵夜']
-  const valid = name.trim()
+  const isEdit  = !!initial
+  const valid   = name.trim()
 
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 100, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
@@ -306,7 +566,9 @@ function AddMealSheet({ onAdd, onClose }: {
         borderRadius: '20px 20px 0 0', padding: '20px 20px 36px', zIndex: 1,
       }}>
         <div style={{ width: 40, height: 4, background: C.border, borderRadius: 2, margin: '0 auto 18px' }} />
-        <div style={{ fontSize: 17, fontWeight: 800, color: C.text, marginBottom: 16 }}>新增一餐</div>
+        <div style={{ fontSize: 17, fontWeight: 800, color: C.text, marginBottom: 16 }}>
+          {isEdit ? '編輯餐點' : '新增一餐'}
+        </div>
 
         <div style={{ display: 'flex', flexWrap: 'wrap' as const, gap: 7, marginBottom: 14 }}>
           {presets.map(p => {
@@ -349,17 +611,14 @@ function AddMealSheet({ onAdd, onClose }: {
         </div>
 
         <button
-          onClick={() => {
-            if (!valid) return
-            onAdd({ id: Date.now(), name: name.trim(), time: time.trim() || '—', foods: [] })
-          }}
+          onClick={() => { if (!valid) return; onSave(name.trim(), time.trim() || '—') }}
           disabled={!valid}
           style={{
             width: '100%', background: valid ? C.orange : C.border,
             color: valid ? '#fff' : C.textSec, border: 'none',
             borderRadius: 12, padding: '13px', fontSize: 15, fontWeight: 800,
             cursor: valid ? 'pointer' : 'not-allowed', transition: 'background 0.2s',
-          }}>新增一餐</button>
+          }}>{isEdit ? '儲存變更' : '新增一餐'}</button>
       </div>
     </div>
   )
@@ -372,17 +631,22 @@ function MealSection({ meal, onUpdate, onDelete, foodDb }: {
   onDelete: () => void
   foodDb: Food[]
 }) {
-  const [isEditing, setIsEditing] = useState(false)
-  const [showAdd, setShowAdd]     = useState(false)
-  const [expanded, setExpanded]   = useState(true)
+  const [isEditing, setIsEditing]   = useState(false)
+  const [showAdd, setShowAdd]       = useState(false)
+  const [editingFood, setEditingFood] = useState<Food | null>(null)
+  const [expanded, setExpanded]     = useState(true)
 
   const mealCal  = meal.foods.reduce((s, f) => s + f.calories, 0)
   const mealProt = meal.foods.reduce((s, f) => s + f.protein, 0)
   const mealFat  = meal.foods.reduce((s, f) => s + f.fat, 0)
   const mealCarb = meal.foods.reduce((s, f) => s + f.carbs, 0)
 
-  const addFood = (food: Food) => { onUpdate({ ...meal, foods: [...meal.foods, food] }); setShowAdd(false) }
-  const delFood = (id: number) => onUpdate({ ...meal, foods: meal.foods.filter(f => f.id !== id) })
+  const addFood  = (food: Food) => { onUpdate({ ...meal, foods: [...meal.foods, food] }); setShowAdd(false) }
+  const delFood  = (id: number) => onUpdate({ ...meal, foods: meal.foods.filter(f => f.id !== id) })
+  const editFood = (updated: Food) => {
+    onUpdate({ ...meal, foods: meal.foods.map(f => f.id === updated.id ? updated : f) })
+    setEditingFood(null)
+  }
 
   return (
     <div style={{
@@ -450,7 +714,11 @@ function MealSection({ meal, onUpdate, onDelete, foodDb }: {
             </div>
           )}
           {meal.foods.map(food => (
-            <FoodRow key={food.id} food={food} isEditing={isEditing} onDelete={() => delFood(food.id)} />
+            <FoodRow
+              key={food.id} food={food} isEditing={isEditing}
+              onEdit={() => setEditingFood(food)}
+              onDelete={() => delFood(food.id)}
+            />
           ))}
           {isEditing && (
             <button onClick={() => setShowAdd(true)} style={{
@@ -468,6 +736,14 @@ function MealSection({ meal, onUpdate, onDelete, foodDb }: {
 
       {showAdd && (
         <AddFoodSheet onAdd={addFood} onClose={() => setShowAdd(false)} foodDb={foodDb} />
+      )}
+
+      {editingFood && (
+        <EditFoodSheet
+          food={editingFood} foodDb={foodDb}
+          onSave={editFood}
+          onClose={() => setEditingFood(null)}
+        />
       )}
     </div>
   )
@@ -517,8 +793,8 @@ export function NutritionTab({ nutritionDay, onUpdateMeal, onAddMeal, onDeleteMe
       </div>
 
       {showAddMeal && (
-        <AddMealSheet
-          onAdd={meal => { onAddMeal(meal); setShowAddMeal(false) }}
+        <MealSheet
+          onSave={(name, time) => { onAddMeal({ id: Date.now(), name, time, foods: [] }); setShowAddMeal(false) }}
           onClose={() => setShowAddMeal(false)}
         />
       )}
