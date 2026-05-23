@@ -14,6 +14,8 @@ import {
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 
+const fmt = (n: number) => +n.toFixed(1)
+
 // ── MacroRow ──────────────────────────────────────────────────
 function MacroRow({ label, value, goal, color }: {
   label: string; value: number; goal: number; color: string
@@ -36,7 +38,7 @@ function MacroRow({ label, value, goal, color }: {
         fontSize: 12, fontWeight: 800, color: over ? color : C.text,
         fontVariantNumeric: 'tabular-nums', width: 70, textAlign: 'right' as const, flexShrink: 0,
       }}>
-        {value}<span style={{ fontSize: 10, color: C.textSec, fontWeight: 500 }}>/{goal}g</span>
+        {fmt(value)}<span style={{ fontSize: 10, color: C.textSec, fontWeight: 500 }}>/{goal}g</span>
       </span>
     </div>
   )
@@ -107,15 +109,15 @@ function FoodRow({ food, isEditing, onEdit, onDelete }: {
           fontSize: 11, color: C.textSec, marginTop: 3,
           display: 'flex', gap: 8, fontVariantNumeric: 'tabular-nums', flexWrap: 'wrap' as const,
         }}>
-          <span style={{ color: MACRO_COLORS.protein }}>蛋白 {food.protein}g</span>
-          <span style={{ color: MACRO_COLORS.fat     }}>脂肪 {food.fat}g</span>
-          <span style={{ color: MACRO_COLORS.carbs   }}>碳水 {food.carbs}g</span>
-          <span style={{ color: MACRO_COLORS.sugar   }}>糖 {food.sugar}g</span>
+          <span style={{ color: MACRO_COLORS.protein }}>蛋白 {fmt(food.protein)}g</span>
+          <span style={{ color: MACRO_COLORS.fat     }}>脂肪 {fmt(food.fat)}g</span>
+          <span style={{ color: MACRO_COLORS.carbs   }}>碳水 {fmt(food.carbs)}g</span>
+          <span style={{ color: MACRO_COLORS.sugar   }}>糖 {fmt(food.sugar)}g</span>
         </div>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0, marginLeft: 10 }}>
         <span style={{ fontSize: 15, fontWeight: 800, color: C.orange, fontVariantNumeric: 'tabular-nums' }}>
-          {food.calories}
+          {fmt(food.calories)}
         </span>
         <span style={{ fontSize: 10, color: C.textSec, fontWeight: 500 }}>kcal</span>
         {isEditing && (
@@ -450,10 +452,10 @@ function AddFoodSheet({ onAdd, onClose, foodDb }: {
                 }}>
                   <div style={{ fontSize: 13, fontWeight: 700, color: C.text, marginBottom: 3 }}>{food.name}</div>
                   <div style={{ display: 'flex', gap: 8, fontSize: 11, fontVariantNumeric: 'tabular-nums', flexWrap: 'wrap' as const }}>
-                    <span style={{ color: C.orange, fontWeight: 800 }}>{food.calories} kcal／份</span>
-                    <span style={{ color: MACRO_COLORS.protein }}>蛋白 {food.protein}g</span>
-                    <span style={{ color: MACRO_COLORS.fat }}>脂肪 {food.fat}g</span>
-                    <span style={{ color: MACRO_COLORS.carbs }}>碳水 {food.carbs}g</span>
+                    <span style={{ color: C.orange, fontWeight: 800 }}>{fmt(food.calories)} kcal／份</span>
+                    <span style={{ color: MACRO_COLORS.protein }}>蛋白 {fmt(food.protein)}g</span>
+                    <span style={{ color: MACRO_COLORS.fat }}>脂肪 {fmt(food.fat)}g</span>
+                    <span style={{ color: MACRO_COLORS.carbs }}>碳水 {fmt(food.carbs)}g</span>
                   </div>
                 </button>
               ))}
@@ -723,10 +725,10 @@ function MealSection({ meal, onUpdate, onDelete, foodDb, dragListeners, dragAttr
             )}
           </div>
           <div style={{ fontSize: 11, marginTop: 3, display: 'flex', gap: 8, fontVariantNumeric: 'tabular-nums', flexWrap: 'wrap' as const }}>
-            <span style={{ color: C.orange, fontWeight: 800 }}>熱量 {mealCal} kcal</span>
-            <span style={{ color: MACRO_COLORS.protein }}>蛋白 {mealProt}g</span>
-            <span style={{ color: MACRO_COLORS.fat     }}>脂肪 {mealFat}g</span>
-            <span style={{ color: MACRO_COLORS.carbs   }}>碳水 {mealCarb}g</span>
+            <span style={{ color: C.orange, fontWeight: 800 }}>熱量 {fmt(mealCal)} kcal</span>
+            <span style={{ color: MACRO_COLORS.protein }}>蛋白 {fmt(mealProt)}g</span>
+            <span style={{ color: MACRO_COLORS.fat     }}>脂肪 {fmt(mealFat)}g</span>
+            <span style={{ color: MACRO_COLORS.carbs   }}>碳水 {fmt(mealCarb)}g</span>
           </div>
         </div>
 
