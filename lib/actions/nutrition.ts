@@ -26,7 +26,7 @@ function toMeal(
   return {
     id:    row.id,
     name:  row.name,
-    time:  row.time,
+    time:  row.time ?? '—',
     foods: foodRows.map(toFood),
   }
 }
@@ -70,8 +70,9 @@ export async function upsertGoals(date: string, data: Goals): Promise<void> {
 
 export async function createMeal(date: string, data: Omit<Meal, 'id'>): Promise<Meal> {
   const { userId } = await verifySession()
+  const time = data.time && data.time !== '—' ? data.time : null
   const [inserted] = await db.insert(meals)
-    .values({ date, userId, name: data.name, time: data.time })
+    .values({ date, userId, name: data.name, time })
     .returning()
 
   if (data.foods.length > 0) {
@@ -94,7 +95,8 @@ export async function createMeal(date: string, data: Omit<Meal, 'id'>): Promise<
 
 export async function updateMeal(id: number, data: Omit<Meal, 'id'>): Promise<Meal> {
   const { userId } = await verifySession()
-  await db.update(meals).set({ name: data.name, time: data.time }).where(and(eq(meals.id, id), eq(meals.userId, userId)))
+  const time = data.time && data.time !== '—' ? data.time : null
+  await db.update(meals).set({ name: data.name, time }).where(and(eq(meals.id, id), eq(meals.userId, userId)))
   await db.delete(mealFoods).where(eq(mealFoods.mealId, id))
 
   if (data.foods.length > 0) {

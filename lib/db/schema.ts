@@ -46,7 +46,7 @@ export const meals = pgTable('meals', {
   userId: integer('user_id').references(() => users.id, { onDelete: 'cascade' }),
   date:   date('date').notNull(),
   name:   text('name').notNull(),
-  time:   time('time').notNull(),
+  time:   time('time'),
 })
 
 export const mealFoods = pgTable('meal_foods', {

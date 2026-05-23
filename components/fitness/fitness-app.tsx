@@ -215,6 +215,7 @@ export function FitnessApp({ initialSessions, initialFoodDb, initialGoals, initi
         display: 'flex', flexDirection: 'column',
         height: '100dvh', background: C.bg,
         position: 'relative', overflow: 'hidden',
+        paddingTop: 'env(safe-area-inset-top)',
       }}>
         {tab === 'workout'   && <WorkoutHeader   count={sessions.length} />}
         {tab === 'nutrition' && <NutritionHeader />}

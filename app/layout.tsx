@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Space_Grotesk } from 'next/font/google'
 import './globals.css'
 
@@ -6,6 +6,14 @@ const spaceGrotesk = Space_Grotesk({
   variable: '--font-space-grotesk',
   subsets: ['latin'],
 })
+
+export const viewport: Viewport = {
+  viewportFit: 'cover',
+  userScalable: false,
+  initialScale: 1,
+  minimumScale: 1,
+  maximumScale: 1,
+}
 
 export const metadata: Metadata = {
   title: 'Fitness Tracker',
