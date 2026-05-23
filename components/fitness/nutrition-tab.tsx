@@ -182,7 +182,7 @@ function AddFoodSheet({ onAdd, onClose, foodDb }: {
   const filtered = foodDb.filter(f => f.name.toLowerCase().includes(search.toLowerCase()))
 
   return (
-    <div style={{ position: 'absolute', inset: 0, zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
+    <div style={{ position: 'fixed', inset: 0, zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
       <div onClick={onClose} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.72)' }} />
       <div style={{
         position: 'relative', background: C.surfaceHigh,
@@ -299,7 +299,7 @@ function AddMealSheet({ onAdd, onClose }: {
   const valid = name.trim()
 
   return (
-    <div style={{ position: 'absolute', inset: 0, zIndex: 100, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
+    <div style={{ position: 'fixed', inset: 0, zIndex: 100, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
       <div onClick={onClose} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.65)' }} />
       <div style={{
         position: 'relative', background: C.surfaceHigh,
