@@ -147,13 +147,15 @@ function FoodDbCard({ food, onEdit, onDelete }: {
       display: 'flex', alignItems: 'center', gap: 10,
     }}>
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{
-          fontSize: 14, fontWeight: 700, color: C.text, marginBottom: 5,
-          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-        }}>{food.name}</div>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 5, minWidth: 0 }}>
+          <span style={{
+            fontSize: 14, fontWeight: 700, color: C.text,
+            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+          }}>{food.name}</span>
+          <span style={{ fontSize: 11, color: C.textSec, fontWeight: 600, flexShrink: 0 }}>每 {food.servingSize ?? 100}g/ml</span>
+        </div>
         <div style={{ display: 'flex', gap: 8, fontSize: 11, fontVariantNumeric: 'tabular-nums', flexWrap: 'wrap' as const }}>
-          <span style={{ color: C.textSec, fontWeight: 600 }}>每 {food.servingSize ?? 100}g/ml</span>
-          <span style={{ color: C.orange, fontWeight: 800 }}>{food.calories} kcal</span>
+          <span style={{ color: C.orange, fontWeight: 800 }}>熱量 {food.calories} kcal</span>
           <span style={{ color: MACRO_COLORS.protein }}>蛋白 {food.protein}g</span>
           <span style={{ color: MACRO_COLORS.fat     }}>脂肪 {food.fat}g</span>
           <span style={{ color: MACRO_COLORS.carbs   }}>碳水 {food.carbs}g</span>
@@ -163,12 +165,22 @@ function FoodDbCard({ food, onEdit, onDelete }: {
       <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
         <button onClick={onEdit} style={{
           background: C.surfaceHigh, border: 'none', borderRadius: 8,
-          padding: '5px 11px', color: C.textSec, fontSize: 11, fontWeight: 700, cursor: 'pointer',
-        }}>編輯</button>
+          width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center',
+          color: C.textSec, cursor: 'pointer',
+        }}>
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M9.5 2L12 4.5L5 11.5H2.5V9L9.5 2Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
+          </svg>
+        </button>
         <button onClick={onDelete} style={{
           background: C.red + '18', border: 'none', borderRadius: 8,
-          padding: '5px 11px', color: C.red, fontSize: 11, fontWeight: 700, cursor: 'pointer',
-        }}>刪除</button>
+          width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center',
+          color: C.red, cursor: 'pointer',
+        }}>
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M2 3.5h10M5.5 3.5V2.5h3v1M5 3.5l.5 7.5M9 3.5l-.5 7.5M3 3.5l.5 8a1 1 0 001 .5h5a1 1 0 001-.5l.5-8" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </button>
       </div>
     </div>
   )
@@ -188,59 +200,61 @@ export function FoodDbTab({ foodDb, onAdd, onEdit, onDelete }: {
   const filtered = foodDb.filter(f => f.name.toLowerCase().includes(search.toLowerCase()))
 
   return (
-    <div style={{ height: '100%', overflowY: 'auto', overflowX: 'hidden', position: 'relative' }}>
-      <div style={{ padding: '10px 16px 6px', position: 'sticky', top: 0, background: C.bg, zIndex: 10 }}>
-        <div style={{
-          display: 'flex', alignItems: 'center', gap: 8,
-          background: C.surface, border: `1px solid ${C.border}`,
-          borderRadius: 12, padding: '8px 12px',
-        }}>
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style={{ flexShrink: 0 }}>
-            <circle cx="6" cy="6" r="5" stroke={C.textSec} strokeWidth="1.5"/>
-            <path d="M10 10l3 3" stroke={C.textSec} strokeWidth="1.5" strokeLinecap="round"/>
-          </svg>
-          <input
-            value={search} onChange={e => setSearch(e.target.value)}
-            placeholder="搜尋食物…"
-            style={{
-              flex: 1, background: 'none', border: 'none', outline: 'none',
-              color: C.text, fontSize: 14,
-            }}
-          />
-          {search && (
-            <button onClick={() => setSearch('')} style={{
-              background: 'none', border: 'none', cursor: 'pointer',
-              color: C.textSec, fontSize: 16, lineHeight: 1, padding: 0,
-            }}>×</button>
-          )}
-        </div>
-      </div>
-
-      <div style={{ padding: '4px 18px 10px', fontSize: 11, color: C.textSec, fontWeight: 500 }}>
-        共 {foodDb.length} 項食物{search ? `，搜尋到 ${filtered.length} 項` : ''}
-      </div>
-
-      {filtered.length === 0 ? (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', paddingTop: 60, gap: 10 }}>
-          <div style={{ fontSize: 40 }}>🥗</div>
-          <div style={{ fontSize: 15, fontWeight: 700, color: C.textSec }}>
-            {search ? '找不到相符食物' : '食物庫是空的'}
-          </div>
-          {!search && <div style={{ fontSize: 12, color: C.textTer }}>點下方按鈕新增第一項食物</div>}
-        </div>
-      ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: '0 16px' }}>
-          {filtered.map(food => (
-            <FoodDbCard
-              key={food.id} food={food}
-              onEdit={() => { setEditItem(food); setShowForm(true) }}
-              onDelete={() => { if (window.confirm(`刪除「${food.name}」？`)) onDelete(food.id) }}
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', position: 'relative' }}>
+        <div style={{ padding: '12px 16px 6px', position: 'sticky', top: 0, background: C.bg, zIndex: 10 }}>
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: 8,
+            background: C.surface, border: `1px solid ${C.border}`,
+            borderRadius: 12, padding: '8px 12px',
+          }}>
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style={{ flexShrink: 0 }}>
+              <circle cx="6" cy="6" r="5" stroke={C.textSec} strokeWidth="1.5"/>
+              <path d="M10 10l3 3" stroke={C.textSec} strokeWidth="1.5" strokeLinecap="round"/>
+            </svg>
+            <input
+              value={search} onChange={e => setSearch(e.target.value)}
+              placeholder="搜尋食物…"
+              style={{
+                flex: 1, background: 'none', border: 'none', outline: 'none',
+                color: C.text, fontSize: 14,
+              }}
             />
-          ))}
+            {search && (
+              <button onClick={() => setSearch('')} style={{
+                background: 'none', border: 'none', cursor: 'pointer',
+                color: C.textSec, fontSize: 16, lineHeight: 1, padding: 0,
+              }}>×</button>
+            )}
+          </div>
         </div>
-      )}
 
-      <div style={{ padding: '14px 16px 20px' }}>
+        <div style={{ padding: '4px 18px 10px', fontSize: 11, color: C.textSec, fontWeight: 500 }}>
+          共 {foodDb.length} 項食物{search ? `，搜尋到 ${filtered.length} 項` : ''}
+        </div>
+
+        {filtered.length === 0 ? (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', paddingTop: 60, gap: 10 }}>
+            <div style={{ fontSize: 40 }}>🥗</div>
+            <div style={{ fontSize: 15, fontWeight: 700, color: C.textSec }}>
+              {search ? '找不到相符食物' : '食物庫是空的'}
+            </div>
+            {!search && <div style={{ fontSize: 12, color: C.textTer }}>點下方按鈕新增第一項食物</div>}
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: '0 16px 8px' }}>
+            {filtered.map(food => (
+              <FoodDbCard
+                key={food.id} food={food}
+                onEdit={() => { setEditItem(food); setShowForm(true) }}
+                onDelete={() => { if (window.confirm(`刪除「${food.name}」？`)) onDelete(food.id) }}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div style={{ padding: '10px 16px 12px', borderTop: `1px solid ${C.border}`, background: C.bg }}>
         <button onClick={() => { setEditItem(null); setShowForm(true) }} style={{
           width: '100%', background: C.orange + '10',
           border: `1.5px dashed ${C.orange}50`, borderRadius: 14, padding: '13px',

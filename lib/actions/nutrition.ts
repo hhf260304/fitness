@@ -2,7 +2,7 @@
 
 import { db } from '@/lib/db'
 import { meals, mealFoods, goals } from '@/lib/db/schema'
-import { eq, and } from 'drizzle-orm'
+import { eq, and, asc } from 'drizzle-orm'
 import type { Meal, Food, Goals, NutritionDay } from '@/lib/types'
 import { DEFAULT_GOALS } from '@/lib/data'
 import { verifySession } from '@/lib/session'
@@ -38,6 +38,7 @@ export async function getNutritionDay(date: string): Promise<NutritionDay> {
   const mealRows = await db.query.meals.findMany({
     where: (t, { and, eq }) => and(eq(t.userId, userId), eq(t.date, date)),
     with: { foods: true },
+    orderBy: (t, { asc }) => [asc(t.sortOrder), asc(t.id)],
   })
   const dayGoals = await getGoals(date)
   return {
@@ -128,4 +129,16 @@ export async function updateMeal(id: number, data: Omit<Meal, 'id'>): Promise<Me
 export async function deleteMeal(id: number): Promise<void> {
   const { userId } = await verifySession()
   await db.delete(meals).where(and(eq(meals.id, id), eq(meals.userId, userId)))
+}
+
+export async function reorderMeals(ids: number[]): Promise<void> {
+  if (ids.length === 0) return
+  const { userId } = await verifySession()
+  await Promise.all(
+    ids.map((id, index) =>
+      db.update(meals)
+        .set({ sortOrder: index })
+        .where(and(eq(meals.id, id), eq(meals.userId, userId)))
+    )
+  )
 }

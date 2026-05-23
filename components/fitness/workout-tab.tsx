@@ -593,38 +593,40 @@ export function WorkoutTab({
   }
 
   return (
-    <div style={{ height: '100%', overflowY: 'auto', overflowX: 'hidden', position: 'relative' }}>
-      {sessions.length === 0 ? (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '60%', gap: 10 }}>
-          <div style={{ fontSize: 44, lineHeight: 1 }}>🏋️</div>
-          <div style={{ fontSize: 15, fontWeight: 700, color: C.textSec }}>尚無訓練紀錄</div>
-          <div style={{ fontSize: 12, color: C.textTer }}>點下方按鈕建立第一份訓練</div>
-        </div>
-      ) : (
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragEnd={handleDragEnd}
-        >
-          <SortableContext
-            items={sessions.map(s => s.id)}
-            strategy={verticalListSortingStrategy}
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden' }}>
+        {sessions.length === 0 ? (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '60%', gap: 10 }}>
+            <div style={{ fontSize: 44, lineHeight: 1 }}>🏋️</div>
+            <div style={{ fontSize: 15, fontWeight: 700, color: C.textSec }}>尚無訓練紀錄</div>
+            <div style={{ fontSize: 12, color: C.textTer }}>點下方按鈕建立第一份訓練</div>
+          </div>
+        ) : (
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
           >
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, padding: '12px 16px 4px' }}>
-              {sessions.map(s => (
-                <SortableSessionCard
-                  key={s.id}
-                  session={s}
-                  onUpdate={updated => onUpdateSession(s.id, updated)}
-                  onDelete={() => onDeleteSession(s.id)}
-                />
-              ))}
-            </div>
-          </SortableContext>
-        </DndContext>
-      )}
+            <SortableContext
+              items={sessions.map(s => s.id)}
+              strategy={verticalListSortingStrategy}
+            >
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, padding: '12px 16px 4px' }}>
+                {sessions.map(s => (
+                  <SortableSessionCard
+                    key={s.id}
+                    session={s}
+                    onUpdate={updated => onUpdateSession(s.id, updated)}
+                    onDelete={() => onDeleteSession(s.id)}
+                  />
+                ))}
+              </div>
+            </SortableContext>
+          </DndContext>
+        )}
+      </div>
 
-      <div style={{ padding: '10px 16px 20px' }}>
+      <div style={{ padding: '10px 16px 12px', borderTop: `1px solid ${C.border}`, background: C.bg }}>
         <button onClick={() => setShowAdd(true)} style={{
           width: '100%', background: C.accent + '10',
           border: `1.5px dashed ${C.accent}50`, borderRadius: 14, padding: '13px',

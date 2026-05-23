@@ -43,6 +43,13 @@
       "when": 1748131200000,
       "tag": "0005_meal_foods_catalog_link",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1779516890759,
+      "tag": "0006_meals_sort_order",
+      "breakpoints": true
     }
   ]
 }

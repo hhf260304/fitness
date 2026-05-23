@@ -3,6 +3,16 @@
 import { useState } from 'react'
 import type { Meal, Food, Goals, NutritionDay } from '@/lib/types'
 import { C, MACRO_COLORS } from '@/lib/fitness-constants'
+import type { DraggableSyntheticListeners } from '@dnd-kit/core'
+import {
+  DndContext, closestCenter, PointerSensor, TouchSensor,
+  useSensor, useSensors, type DragEndEvent,
+} from '@dnd-kit/core'
+import {
+  SortableContext, verticalListSortingStrategy,
+  arrayMove, useSortable,
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 
 // ── MacroRow ──────────────────────────────────────────────────
 function MacroRow({ label, value, goal, color }: {
@@ -41,7 +51,7 @@ function MacroSummary({ totals, goals }: {
 
   return (
     <div style={{
-      margin: '8px 16px 12px', background: C.surface, borderRadius: 18,
+      margin: '12px 16px 12px', background: C.surface, borderRadius: 18,
       border: `1px solid ${C.border}`, padding: '16px',
     }}>
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 10, flexWrap: 'wrap' as const }}>
@@ -310,9 +320,9 @@ function AddFoodSheet({ onAdd, onClose, foodDb }: {
   })
   const set = (k: keyof typeof form, v: string) => setForm(prev => ({ ...prev, [k]: v }))
 
-  const amt = parseFloat(amount) || 0
   const base = selected?.servingSize ?? 100
-  const calc = (selected && amt > 0) ? {
+  const amt  = parseFloat(amount) || base
+  const calc = selected ? {
     calories: Math.round(selected.calories * amt / base),
     protein:  Math.round(selected.protein  * amt / base * 10) / 10,
     fat:      Math.round(selected.fat      * amt / base * 10) / 10,
@@ -369,7 +379,7 @@ function AddFoodSheet({ onAdd, onClose, foodDb }: {
   )
 
   const manualValid = form.name.trim() && form.calories
-  const dbValid     = selected && amt > 0
+  const dbValid     = !!selected
   const filtered    = foodDb.filter(f => f.name.toLowerCase().includes(search.toLowerCase()))
 
   return (
@@ -607,8 +617,8 @@ function MealSheet({ initial, onSave, onClose }: {
         <div style={{ marginBottom: 22 }}>
           <label style={{ fontSize: 11, color: C.textSec, fontWeight: 700, letterSpacing: '0.5px', display: 'block', marginBottom: 6 }}>時間（選填）</label>
           <input
+            type="time"
             value={time} onChange={e => setTime(e.target.value)}
-            placeholder="例：12:30"
             style={{
               width: '100%', background: C.surface, border: `1px solid ${C.border}`,
               borderRadius: 10, padding: '11px 14px', color: C.text, fontSize: 14,
@@ -632,16 +642,19 @@ function MealSheet({ initial, onSave, onClose }: {
 }
 
 // ── MealSection ───────────────────────────────────────────────
-function MealSection({ meal, onUpdate, onDelete, foodDb }: {
+function MealSection({ meal, onUpdate, onDelete, foodDb, dragListeners, dragAttributes }: {
   meal: Meal
   onUpdate: (m: Meal) => void
   onDelete: () => void
   foodDb: Food[]
+  dragListeners?:  DraggableSyntheticListeners
+  dragAttributes?: React.HTMLAttributes<HTMLElement>
 }) {
-  const [isEditing, setIsEditing]   = useState(false)
-  const [showAdd, setShowAdd]       = useState(false)
+  const [isEditing, setIsEditing]     = useState(false)
+  const [showAdd, setShowAdd]         = useState(false)
   const [editingFood, setEditingFood] = useState<Food | null>(null)
-  const [expanded, setExpanded]     = useState(true)
+  const [expanded, setExpanded]       = useState(true)
+  const [showMealEdit, setShowMealEdit] = useState(false)
 
   const mealCal  = meal.foods.reduce((s, f) => s + f.calories, 0)
   const mealProt = meal.foods.reduce((s, f) => s + f.protein, 0)
@@ -664,6 +677,27 @@ function MealSection({ meal, onUpdate, onDelete, foodDb }: {
       <div onClick={() => setExpanded(p => !p)} style={{
         display: 'flex', alignItems: 'center', padding: '11px 14px', cursor: 'pointer', gap: 8,
       }}>
+        {dragListeners && (
+          <div
+            {...dragListeners}
+            {...dragAttributes}
+            onClick={e => e.stopPropagation()}
+            style={{
+              cursor: 'grab', color: C.textTer, flexShrink: 0,
+              display: 'flex', alignItems: 'center', alignSelf: 'center',
+              touchAction: 'none', padding: '4px 2px',
+            }}
+          >
+            <svg width="12" height="16" viewBox="0 0 12 16" fill="none">
+              <circle cx="3.5" cy="3"  r="1.5" fill="currentColor"/>
+              <circle cx="3.5" cy="8"  r="1.5" fill="currentColor"/>
+              <circle cx="3.5" cy="13" r="1.5" fill="currentColor"/>
+              <circle cx="8.5" cy="3"  r="1.5" fill="currentColor"/>
+              <circle cx="8.5" cy="8"  r="1.5" fill="currentColor"/>
+              <circle cx="8.5" cy="13" r="1.5" fill="currentColor"/>
+            </svg>
+          </div>
+        )}
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <span style={{ fontSize: 14, fontWeight: 800, color: C.text }}>{meal.name}</span>
@@ -672,11 +706,24 @@ function MealSection({ meal, onUpdate, onDelete, foodDb }: {
                 fontSize: 10, color: C.textSec, fontWeight: 500,
                 background: C.surfaceHigh, padding: '2px 7px', borderRadius: 99,
                 border: `1px solid ${C.border}`,
-              }}>{meal.time}</span>
+              }}>{meal.time.slice(0, 5)}</span>
+            )}
+            {isEditing && (
+              <button
+                onClick={e => { e.stopPropagation(); setShowMealEdit(true) }}
+                style={{
+                  background: 'none', border: 'none', cursor: 'pointer',
+                  color: C.textSec, padding: '2px', display: 'flex', alignItems: 'center',
+                }}
+              >
+                <svg width="13" height="13" viewBox="0 0 14 14" fill="none">
+                  <path d="M9.5 2L12 4.5L5 11.5H2.5V9L9.5 2Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
+                </svg>
+              </button>
             )}
           </div>
           <div style={{ fontSize: 11, marginTop: 3, display: 'flex', gap: 8, fontVariantNumeric: 'tabular-nums', flexWrap: 'wrap' as const }}>
-            <span style={{ color: C.orange, fontWeight: 800 }}>{mealCal} kcal</span>
+            <span style={{ color: C.orange, fontWeight: 800 }}>熱量 {mealCal} kcal</span>
             <span style={{ color: MACRO_COLORS.protein }}>蛋白 {mealProt}g</span>
             <span style={{ color: MACRO_COLORS.fat     }}>脂肪 {mealFat}g</span>
             <span style={{ color: MACRO_COLORS.carbs   }}>碳水 {mealCarb}g</span>
@@ -697,7 +744,7 @@ function MealSection({ meal, onUpdate, onDelete, foodDb }: {
               }}>刪除</button>
           )}
           <button
-            onClick={e => { e.stopPropagation(); setIsEditing(p => !p) }}
+            onClick={e => { e.stopPropagation(); if (!isEditing) setExpanded(true); setIsEditing(p => !p) }}
             style={{
               background: isEditing ? C.orange : C.surfaceHigh,
               color: isEditing ? '#fff' : C.textSec, border: 'none',
@@ -752,16 +799,60 @@ function MealSection({ meal, onUpdate, onDelete, foodDb }: {
           onClose={() => setEditingFood(null)}
         />
       )}
+
+      {showMealEdit && (
+        <MealSheet
+          initial={{ name: meal.name, time: meal.time }}
+          onSave={(name, time) => { onUpdate({ ...meal, name, time }); setShowMealEdit(false) }}
+          onClose={() => setShowMealEdit(false)}
+        />
+      )}
+    </div>
+  )
+}
+
+// ── SortableMealSection ───────────────────────────────────────
+function SortableMealSection({ meal, onUpdate, onDelete, foodDb }: {
+  meal: Meal
+  onUpdate: (m: Meal) => void
+  onDelete: () => void
+  foodDb: Food[]
+}) {
+  const {
+    attributes, listeners, setNodeRef,
+    transform, transition, isDragging,
+  } = useSortable({ id: meal.id })
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={{
+        transform: CSS.Translate.toString(transform),
+        transition,
+        opacity:  isDragging ? 0.4 : 1,
+        position: 'relative' as const,
+        zIndex:   isDragging ? 10 : undefined,
+      }}
+    >
+      <MealSection
+        meal={meal}
+        onUpdate={onUpdate}
+        onDelete={onDelete}
+        foodDb={foodDb}
+        dragListeners={listeners}
+        dragAttributes={attributes}
+      />
     </div>
   )
 }
 
 // ── NutritionTab ──────────────────────────────────────────────
-export function NutritionTab({ nutritionDay, onUpdateMeal, onAddMeal, onDeleteMeal, foodDb, goals }: {
+export function NutritionTab({ nutritionDay, onUpdateMeal, onAddMeal, onDeleteMeal, onReorderMeals, foodDb, goals }: {
   nutritionDay: NutritionDay | undefined
   onUpdateMeal: (id: number, updated: Meal) => void
   onAddMeal: (meal: Meal) => void
   onDeleteMeal: (id: number) => void
+  onReorderMeals: (ids: number[]) => void
   foodDb: Food[]
   goals: Goals
 }) {
@@ -775,20 +866,39 @@ export function NutritionTab({ nutritionDay, onUpdateMeal, onAddMeal, onDeleteMe
     return acc
   }, { calories: 0, protein: 0, fat: 0, carbs: 0, sugar: 0 })
 
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(TouchSensor,   { activationConstraint: { delay: 150, tolerance: 5 } }),
+  )
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event
+    if (!over || active.id === over.id) return
+    const oldIndex = meals.findIndex(m => m.id === active.id)
+    const newIndex = meals.findIndex(m => m.id === over.id)
+    const reordered = arrayMove(meals, oldIndex, newIndex)
+    onReorderMeals(reordered.map(m => m.id))
+  }
+
   return (
-    <div style={{ height: '100%', overflowY: 'auto', overflowX: 'hidden', position: 'relative' }}>
-      <MacroSummary totals={totals} goals={goals} />
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden' }}>
+        <MacroSummary totals={totals} goals={goals} />
 
-      {meals.map(meal => (
-        <MealSection
-          key={meal.id} meal={meal}
-          onUpdate={updated => onUpdateMeal(meal.id, updated)}
-          onDelete={() => onDeleteMeal(meal.id)}
-          foodDb={foodDb}
-        />
-      ))}
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+          <SortableContext items={meals.map(m => m.id)} strategy={verticalListSortingStrategy}>
+            {meals.map(meal => (
+              <SortableMealSection
+                key={meal.id} meal={meal}
+                onUpdate={updated => onUpdateMeal(meal.id, updated)}
+                onDelete={() => onDeleteMeal(meal.id)}
+                foodDb={foodDb}
+              />
+            ))}
+          </SortableContext>
+        </DndContext>
+      </div>
 
-      <div style={{ padding: '4px 16px 20px' }}>
+      <div style={{ padding: '10px 16px 12px', borderTop: `1px solid ${C.border}`, background: C.bg }}>
         <button onClick={() => setShowAddMeal(true)} style={{
           width: '100%', background: C.orange + '10',
           border: `1.5px dashed ${C.orange}50`, borderRadius: 14, padding: '13px',

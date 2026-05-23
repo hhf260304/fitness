@@ -199,6 +199,14 @@ export function FitnessApp({ initialSessions, initialFoodDb, initialGoals, initi
       meals: prev.meals.filter(m => m.id !== id),
     }))
   }
+  const reorderMeals = async (ids: number[]) => {
+    const map = new Map(nutritionDay.meals.map(m => [m.id, m]))
+    setNutritionDay(prev => ({
+      ...prev,
+      meals: ids.map(id => map.get(id)).filter((m): m is Meal => m !== undefined),
+    }))
+    await nutritionActions.reorderMeals(ids)
+  }
   const saveGoals = async (g: Goals) => {
     await nutritionActions.upsertGoals(TODAY, g)
     setUserGoals(g)
@@ -238,6 +246,7 @@ export function FitnessApp({ initialSessions, initialFoodDb, initialGoals, initi
               onUpdateMeal={updateMeal}
               onAddMeal={addMeal}
               onDeleteMeal={deleteMeal}
+              onReorderMeals={reorderMeals}
               foodDb={foodDb}
               goals={userGoals}
             />

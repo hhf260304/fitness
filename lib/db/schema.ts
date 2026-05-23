@@ -43,11 +43,12 @@ export const foodCatalog = pgTable('food_catalog', {
 ])
 
 export const meals = pgTable('meals', {
-  id:     serial('id').primaryKey(),
-  userId: integer('user_id').references(() => users.id, { onDelete: 'cascade' }),
-  date:   date('date').notNull(),
-  name:   text('name').notNull(),
-  time:   time('time'),
+  id:        serial('id').primaryKey(),
+  userId:    integer('user_id').references(() => users.id, { onDelete: 'cascade' }),
+  date:      date('date').notNull(),
+  name:      text('name').notNull(),
+  time:      time('time'),
+  sortOrder: integer('sort_order').default(0).notNull(),
 })
 
 export const mealFoods = pgTable('meal_foods', {

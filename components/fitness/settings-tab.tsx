@@ -190,7 +190,7 @@ export function SettingsTab({ goals, onSave }: {
 
   return (
     <div style={{ height: '100%', overflowY: 'auto', overflowX: 'hidden' }}>
-      <div style={{ padding: '10px 18px 6px', fontSize: 11, color: C.textSec, fontWeight: 700, letterSpacing: '0.5px', textTransform: 'uppercase' as const }}>
+      <div style={{ padding: '12px 16px 6px', fontSize: 11, color: C.textSec, fontWeight: 700, letterSpacing: '0.5px', textTransform: 'uppercase' as const }}>
         每日飲食目標
       </div>
 
