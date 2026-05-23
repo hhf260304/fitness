@@ -92,6 +92,7 @@ function ExerciseEditCard({
       </label>
       <input
         type="number" value={strVals[key]}
+        onFocus={e => e.currentTarget.select()}
         onChange={e => {
           setStrVals(prev => ({ ...prev, [key]: e.target.value }))
           const n = parseFloat(e.target.value)
@@ -189,6 +190,7 @@ function AddExerciseSheet({
       </label>
       <input
         type="number" value={strVals[key]}
+        onFocus={e => e.currentTarget.select()}
         onChange={e => {
           setStrVals(prev => ({ ...prev, [key]: e.target.value }))
           const n = parseFloat(e.target.value)
@@ -399,7 +401,7 @@ function SessionCard({
           }}>
             {session.exercises.length} 個動作 · {totalSets} 總組數
             {session.exercises.length > 0 && (
-              ` · 休息 ${Math.floor(totalRestSec / 60)}:${String(totalRestSec % 60).padStart(2, '0')}`
+              ` · 休息 ${Math.floor(totalRestSec / 60)}m${String(totalRestSec % 60).padStart(2, '0')}s`
             )}
           </div>
           {muscles.length > 0 && (
