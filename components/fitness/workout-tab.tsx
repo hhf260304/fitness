@@ -487,7 +487,7 @@ function SortableSessionCard({
     <div
       ref={setNodeRef}
       style={{
-        transform: CSS.Transform.toString(transform),
+        transform: CSS.Translate.toString(transform),
         transition,
         opacity:  isDragging ? 0.4 : 1,
         position: 'relative' as const,
@@ -574,6 +574,7 @@ export function WorkoutTab({
     if (!over || active.id === over.id) return
     const oldIndex = sessions.findIndex(s => s.id === active.id)
     const newIndex = sessions.findIndex(s => s.id === over.id)
+    if (oldIndex === -1 || newIndex === -1) return
     const reordered = arrayMove(sessions, oldIndex, newIndex)
     onReorderSessions(reordered.map(s => s.id))
   }
