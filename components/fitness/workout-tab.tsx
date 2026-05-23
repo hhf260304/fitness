@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import type { Session, Exercise, MuscleGroup } from '@/lib/types'
 import { C, MUSCLE_COLORS, MUSCLES } from '@/lib/fitness-constants'
 import type { DraggableSyntheticListeners } from '@dnd-kit/core'
@@ -307,9 +307,6 @@ function SessionCard({
     }
   }
 
-  useEffect(() => {
-    if (!editingName) setNameInput(session.name)
-  }, [session.name, editingName])
 
   const updateEx = (id: number, updated: Exercise) =>
     onUpdate({ ...session, exercises: session.exercises.map(e => e.id === id ? updated : e) })
@@ -381,7 +378,7 @@ function SessionCard({
                   {session.name}
                 </span>
                 <button
-                  onClick={e => { e.stopPropagation(); setEditingName(true) }}
+                  onClick={e => { e.stopPropagation(); setNameInput(session.name); setEditingName(true) }}
                   style={{
                     background: 'none', border: 'none', color: C.textTer,
                     cursor: 'pointer', padding: '6px', flexShrink: 0, lineHeight: 1,
