@@ -72,7 +72,7 @@ export default function LoginPage() {
               </div>
             )}
             <button type="submit" disabled={loginPending} style={{
-              padding: '13px', background: C.accent, color: '#000',
+              padding: '13px', background: C.accent, color: '#fff',
               border: 'none', borderRadius: 12, fontSize: 15, fontWeight: 800,
               cursor: loginPending ? 'not-allowed' : 'pointer',
               opacity: loginPending ? 0.7 : 1, marginTop: 4,

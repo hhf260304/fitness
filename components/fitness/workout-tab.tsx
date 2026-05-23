@@ -152,7 +152,7 @@ function ExerciseEditCard({
       </div>
       <div style={{ display: 'flex', gap: 8 }}>
         <button onClick={() => onSave(local)} style={{
-          flex: 1, background: C.accent, color: '#000', border: 'none',
+          flex: 1, background: C.accent, color: '#fff', border: 'none',
           borderRadius: 10, padding: '10px', fontSize: 14, fontWeight: 800, cursor: 'pointer',
         }}>✓ 完成</button>
         <button onClick={onDelete} style={{
@@ -269,7 +269,7 @@ function AddExerciseSheet({
           disabled={!valid}
           style={{
             width: '100%', background: valid ? C.accent : C.border,
-            color: valid ? '#000' : C.textSec, border: 'none',
+            color: valid ? '#fff' : C.textSec, border: 'none',
             borderRadius: 12, padding: '13px', fontSize: 15, fontWeight: 800,
             cursor: valid ? 'pointer' : 'not-allowed', transition: 'background 0.2s',
           }}>新增動作</button>
@@ -542,7 +542,7 @@ function AddSessionSheet({
           disabled={!name.trim()}
           style={{
             width: '100%', background: name.trim() ? C.accent : C.border,
-            color: name.trim() ? '#000' : C.textSec, border: 'none',
+            color: name.trim() ? '#fff' : C.textSec, border: 'none',
             borderRadius: 12, padding: '13px', fontSize: 15, fontWeight: 800,
             cursor: name.trim() ? 'pointer' : 'not-allowed', transition: 'background 0.2s',
           }}>建立訓練</button>
