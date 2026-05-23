@@ -559,15 +559,22 @@ function MealSheet({ initial, onSave, onClose }: {
   const valid   = name.trim()
 
   return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 100, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
-      <div onClick={onClose} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.65)' }} />
+    <div style={{ position: 'fixed', inset: 0, zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
+      <div onClick={onClose} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.72)' }} />
       <div style={{
         position: 'relative', background: C.surfaceHigh,
-        borderRadius: '20px 20px 0 0', padding: '20px 20px 36px', zIndex: 1,
+        borderRadius: 20, padding: '20px 20px 24px', zIndex: 1,
+        width: '100%', boxShadow: '0 24px 48px rgba(0,0,0,0.5)',
       }}>
-        <div style={{ width: 40, height: 4, background: C.border, borderRadius: 2, margin: '0 auto 18px' }} />
-        <div style={{ fontSize: 17, fontWeight: 800, color: C.text, marginBottom: 16 }}>
-          {isEdit ? '編輯餐點' : '新增一餐'}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+          <div style={{ fontSize: 17, fontWeight: 800, color: C.text }}>
+            {isEdit ? '編輯餐點' : '新增一餐'}
+          </div>
+          <button onClick={onClose} style={{
+            background: C.border, border: 'none', borderRadius: '50%',
+            width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
+            cursor: 'pointer', color: C.textSec, fontSize: 16, lineHeight: 1,
+          }}>×</button>
         </div>
 
         <div style={{ display: 'flex', flexWrap: 'wrap' as const, gap: 7, marginBottom: 14 }}>
