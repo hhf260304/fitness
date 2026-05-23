@@ -31,7 +31,7 @@ export async function createFood(data: Omit<Food, 'id'>): Promise<Food> {
     .values({
       userId,
       name:        data.name,
-      servingSize: data.servingSize ?? 100,
+      servingSize: Math.round(data.servingSize ?? 100),
       calories:    data.calories,
       protein:     String(data.protein),
       fat:         String(data.fat),
@@ -44,7 +44,7 @@ export async function createFood(data: Omit<Food, 'id'>): Promise<Food> {
 
 export async function updateFood(id: number, data: Omit<Food, 'id'>): Promise<Food> {
   const { userId } = await verifySession()
-  const servingSize = data.servingSize ?? 100
+  const servingSize = Math.round(data.servingSize ?? 100)
 
   const [updated] = await db.update(foodCatalog)
     .set({
