@@ -34,7 +34,7 @@ async function seed() {
   await db.insert(foodCatalog).values(
     DEFAULT_FOOD_DB.map(f => ({
       name:     f.name,
-      calories: f.calories,
+      calories: String(f.calories),
       protein:  String(f.protein),
       fat:      String(f.fat),
       carbs:    String(f.carbs),
