@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import type { Goals } from '@/lib/types'
 import { C, MACRO_COLORS } from '@/lib/fitness-constants'
 import { logout } from '@/lib/actions/auth'
@@ -11,6 +11,10 @@ function GoalRow({ field, label, unit, color, value, onChange }: {
   value: number; onChange: (v: number) => void
 }) {
   const step = field === 'calories' ? 50 : 5
+  const [strVal, setStrVal] = useState(String(value))
+
+  useEffect(() => { setStrVal(String(value)) }, [value])
+
   return (
     <div style={{
       display: 'flex', alignItems: 'center', gap: 12,
@@ -34,8 +38,19 @@ function GoalRow({ field, label, unit, color, value, onChange }: {
             cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>−</button>
         <input
-          type="number" value={value}
-          onChange={e => onChange(parseInt(e.target.value) || 0)}
+          type="number" value={strVal}
+          onFocus={e => e.currentTarget.select()}
+          onChange={e => {
+            setStrVal(e.target.value)
+            const n = parseInt(e.target.value)
+            if (!isNaN(n)) onChange(n)
+          }}
+          onBlur={() => {
+            const n = parseInt(strVal)
+            const safe = isNaN(n) ? 0 : n
+            setStrVal(String(safe))
+            onChange(safe)
+          }}
           style={{
             width: 72, height: 32, background: C.surface,
             border: `1px solid ${C.border}`, borderLeft: 'none', borderRight: 'none',
@@ -58,10 +73,11 @@ function GoalRow({ field, label, unit, color, value, onChange }: {
 
 // ── MacroRing ─────────────────────────────────────────────────
 function MacroRing({ goals }: { goals: Goals }) {
-  const protCal = goals.protein * 4
-  const fatCal  = goals.fat * 9
-  const carbCal = goals.carbs * 4
-  const total   = protCal + fatCal + carbCal || 1
+  const protCal  = goals.protein * 4
+  const fatCal   = goals.fat * 9
+  const carbCal  = goals.carbs * 4
+  const sugarCal = goals.sugar * 4
+  const total    = protCal + fatCal + carbCal || 1
 
   const r = 46, cx = 56, cy = 56, stroke = 14
   const circ = 2 * Math.PI * r
@@ -127,6 +143,16 @@ function MacroRing({ goals }: { goals: Goals }) {
             </span>
           </div>
         ))}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+          <div style={{ width: 8, height: 8, borderRadius: '50%', background: MACRO_COLORS.sugar, flexShrink: 0 }} />
+          <span style={{ fontSize: 12, color: C.textSec, flex: 1 }}>糖</span>
+          <span style={{ fontSize: 13, fontWeight: 800, color: C.text, fontVariantNumeric: 'tabular-nums' }}>
+            {goals.sugar}g
+          </span>
+          <span style={{ fontSize: 10, color: C.textTer, width: 30, textAlign: 'right' as const }}>
+            {(sugarCal / total * 100).toFixed(0)}%
+          </span>
+        </div>
       </div>
     </div>
   )
