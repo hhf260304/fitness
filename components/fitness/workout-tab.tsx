@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import type { Session, Exercise, MuscleGroup } from '@/lib/types'
 import { C, MUSCLE_COLORS, MUSCLES } from '@/lib/fitness-constants'
 import type { DraggableSyntheticListeners } from '@dnd-kit/core'
@@ -286,7 +286,7 @@ function SessionCard({
   const muscles   = [...new Set(session.exercises.map(e => e.muscle))].slice(0, 4)
   const totalSets = session.exercises.reduce((s, e) => s + (e.sets || 0), 0)
 
-  const totalRestSec = session.exercises.reduce((s, e) => s + e.sets * e.rest, 0)
+  const totalRestSec = session.exercises.reduce((s, e) => s + (e.sets || 0) * (e.rest || 0), 0)
 
   const confirmNameEdit = () => {
     setEditingName(false)
@@ -297,6 +297,10 @@ function SessionCard({
       setNameInput(session.name)
     }
   }
+
+  useEffect(() => {
+    if (!editingName) setNameInput(session.name)
+  }, [session.name, editingName])
 
   const updateEx = (id: number, updated: Exercise) =>
     onUpdate({ ...session, exercises: session.exercises.map(e => e.id === id ? updated : e) })
@@ -320,25 +324,27 @@ function SessionCard({
         }}
       >
         {/* Drag handle */}
-        <div
-          {...dragListeners}
-          {...dragAttributes}
-          onClick={e => e.stopPropagation()}
-          style={{
-            cursor: 'grab', color: C.textTer, flexShrink: 0,
-            display: 'flex', alignItems: 'center', alignSelf: 'center',
-            touchAction: 'none', padding: '4px 2px',
-          }}
-        >
-          <svg width="12" height="16" viewBox="0 0 12 16" fill="none">
-            <circle cx="3.5" cy="3"  r="1.5" fill="currentColor"/>
-            <circle cx="3.5" cy="8"  r="1.5" fill="currentColor"/>
-            <circle cx="3.5" cy="13" r="1.5" fill="currentColor"/>
-            <circle cx="8.5" cy="3"  r="1.5" fill="currentColor"/>
-            <circle cx="8.5" cy="8"  r="1.5" fill="currentColor"/>
-            <circle cx="8.5" cy="13" r="1.5" fill="currentColor"/>
-          </svg>
-        </div>
+        {dragListeners && (
+          <div
+            {...dragListeners}
+            {...dragAttributes}
+            onClick={e => e.stopPropagation()}
+            style={{
+              cursor: 'grab', color: C.textTer, flexShrink: 0,
+              display: 'flex', alignItems: 'center', alignSelf: 'center',
+              touchAction: 'none', padding: '4px 2px',
+            }}
+          >
+            <svg width="12" height="16" viewBox="0 0 12 16" fill="none">
+              <circle cx="3.5" cy="3"  r="1.5" fill="currentColor"/>
+              <circle cx="3.5" cy="8"  r="1.5" fill="currentColor"/>
+              <circle cx="3.5" cy="13" r="1.5" fill="currentColor"/>
+              <circle cx="8.5" cy="3"  r="1.5" fill="currentColor"/>
+              <circle cx="8.5" cy="8"  r="1.5" fill="currentColor"/>
+              <circle cx="8.5" cy="13" r="1.5" fill="currentColor"/>
+            </svg>
+          </div>
+        )}
 
         {/* Name + stats */}
         <div style={{ flex: 1, minWidth: 0 }}>
@@ -350,7 +356,7 @@ function SessionCard({
                 onChange={e => setNameInput(e.target.value)}
                 onBlur={confirmNameEdit}
                 onKeyDown={e => {
-                  if (e.key === 'Enter')  confirmNameEdit()
+                  if (e.key === 'Enter')  e.currentTarget.blur()
                   if (e.key === 'Escape') { setEditingName(false); setNameInput(session.name) }
                 }}
                 onClick={e => e.stopPropagation()}
@@ -369,7 +375,7 @@ function SessionCard({
                   onClick={e => { e.stopPropagation(); setEditingName(true) }}
                   style={{
                     background: 'none', border: 'none', color: C.textTer,
-                    cursor: 'pointer', padding: '2px', flexShrink: 0, lineHeight: 1,
+                    cursor: 'pointer', padding: '6px', flexShrink: 0, lineHeight: 1,
                   }}
                 >
                   <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
