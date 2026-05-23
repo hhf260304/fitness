@@ -4,6 +4,15 @@ import { useState, useEffect } from 'react'
 import type { Session, Exercise, MuscleGroup } from '@/lib/types'
 import { C, MUSCLE_COLORS, MUSCLES } from '@/lib/fitness-constants'
 import type { DraggableSyntheticListeners } from '@dnd-kit/core'
+import {
+  DndContext, closestCenter, PointerSensor, TouchSensor,
+  useSensor, useSensors, type DragEndEvent,
+} from '@dnd-kit/core'
+import {
+  SortableContext, verticalListSortingStrategy,
+  arrayMove, useSortable,
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 
 // ── MuscleTag ─────────────────────────────────────────────────
 function MuscleTag({ muscle, small }: { muscle: string; small?: boolean }) {
@@ -461,6 +470,41 @@ function SessionCard({
   )
 }
 
+// ── SortableSessionCard ───────────────────────────────────────
+function SortableSessionCard({
+  session, onUpdate, onDelete,
+}: {
+  session: Session
+  onUpdate: (s: Session) => void
+  onDelete: () => void
+}) {
+  const {
+    attributes, listeners, setNodeRef,
+    transform, transition, isDragging,
+  } = useSortable({ id: session.id })
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={{
+        transform: CSS.Transform.toString(transform),
+        transition,
+        opacity:  isDragging ? 0.4 : 1,
+        position: 'relative' as const,
+        zIndex:   isDragging ? 10 : undefined,
+      }}
+    >
+      <SessionCard
+        session={session}
+        onUpdate={onUpdate}
+        onDelete={onDelete}
+        dragListeners={listeners}
+        dragAttributes={attributes}
+      />
+    </div>
+  )
+}
+
 // ── AddSessionSheet ───────────────────────────────────────────
 function AddSessionSheet({
   onAdd, onClose,
@@ -510,14 +554,29 @@ function AddSessionSheet({
 
 // ── WorkoutTab ────────────────────────────────────────────────
 export function WorkoutTab({
-  sessions, onUpdateSession, onDeleteSession, onAddSession,
+  sessions, onUpdateSession, onDeleteSession, onAddSession, onReorderSessions,
 }: {
   sessions: Session[]
   onUpdateSession: (id: number, updated: Session) => void
   onDeleteSession: (id: number) => void
   onAddSession: (s: Session) => void
+  onReorderSessions: (ids: number[]) => void
 }) {
   const [showAdd, setShowAdd] = useState(false)
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(TouchSensor,   { activationConstraint: { delay: 150, tolerance: 5 } }),
+  )
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event
+    if (!over || active.id === over.id) return
+    const oldIndex = sessions.findIndex(s => s.id === active.id)
+    const newIndex = sessions.findIndex(s => s.id === over.id)
+    const reordered = arrayMove(sessions, oldIndex, newIndex)
+    onReorderSessions(reordered.map(s => s.id))
+  }
 
   return (
     <div style={{ height: '100%', overflowY: 'auto', overflowX: 'hidden', position: 'relative' }}>
@@ -528,14 +587,27 @@ export function WorkoutTab({
           <div style={{ fontSize: 12, color: C.textTer }}>點下方按鈕建立第一份訓練</div>
         </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, padding: '12px 16px 4px' }}>
-          {sessions.map(s => (
-            <SessionCard key={s.id} session={s}
-              onUpdate={updated => onUpdateSession(s.id, updated)}
-              onDelete={() => onDeleteSession(s.id)}
-            />
-          ))}
-        </div>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext
+            items={sessions.map(s => s.id)}
+            strategy={verticalListSortingStrategy}
+          >
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, padding: '12px 16px 4px' }}>
+              {sessions.map(s => (
+                <SortableSessionCard
+                  key={s.id}
+                  session={s}
+                  onUpdate={updated => onUpdateSession(s.id, updated)}
+                  onDelete={() => onDeleteSession(s.id)}
+                />
+              ))}
+            </div>
+          </SortableContext>
+        </DndContext>
       )}
 
       <div style={{ padding: '10px 16px 20px' }}>
