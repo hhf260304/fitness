@@ -61,7 +61,7 @@ export default function LoginPage() {
         {/* Login Form */}
         {tab === 'login' && (
           <form action={loginAction} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            <input name="email"    type="text"    placeholder="Email"   required style={inputStyle} />
+            <input name="email"    type="text"    placeholder="帳號"   required style={inputStyle} />
             <input name="password" type="password" placeholder="密碼"     required style={inputStyle} />
             {loginState?.error && (
               <div style={{
@@ -85,7 +85,7 @@ export default function LoginPage() {
         {/* Register Form */}
         {tab === 'register' && (
           <form action={registerAction} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            <input name="email"           type="text"    placeholder="Email"         required style={inputStyle} />
+            <input name="email"           type="text"    placeholder="帳號"           required style={inputStyle} />
             <input name="password"        type="password" placeholder="密碼（至少 8 字元）" required style={inputStyle} />
             <input name="confirmPassword" type="password" placeholder="確認密碼"           required style={inputStyle} />
             {registerState?.error && (

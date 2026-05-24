@@ -35,7 +35,7 @@ export async function register(prevState: FormState, formData: FormData): Promis
   const normalizedEmail = email.toLowerCase().trim()
 
   const [existing] = await db.select().from(users).where(eq(users.email, normalizedEmail))
-  if (existing) return { error: '此 email 已被使用' }
+  if (existing) return { error: '此帳號已被使用' }
 
   const allUsers    = await db.select({ id: users.id }).from(users)
   const isFirstUser = allUsers.length === 0
