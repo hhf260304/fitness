@@ -1,11 +1,12 @@
 'use client'
 
 import { useState } from 'react'
-import type { TabId, Session, Food, Goals, NutritionDay, Meal } from '@/lib/types'
+import type { TabId, Session, Food, Goals, NutritionDay, Meal, FoodCategory } from '@/lib/types'
 import { C } from '@/lib/fitness-constants'
 import * as sessionActions   from '@/lib/actions/sessions'
 import * as nutritionActions from '@/lib/actions/nutrition'
 import * as foodActions      from '@/lib/actions/food-catalog'
+import * as categoryActions  from '@/lib/actions/food-categories'
 import { WorkoutTab }   from '@/components/fitness/workout-tab'
 import { NutritionTab } from '@/components/fitness/nutrition-tab'
 import { FoodDbTab }    from '@/components/fitness/food-db-tab'
@@ -129,6 +130,7 @@ function SettingsHeader() {
 type Props = {
   initialSessions:     Session[]
   initialFoodDb:       Food[]
+  initialCategories:   FoodCategory[]
   initialGoals:        Goals
   initialNutritionDay: NutritionDay
 }
@@ -136,10 +138,11 @@ type Props = {
 const TODAY = new Date().toISOString().slice(0, 10)
 
 // ── Main Client Component ─────────────────────────────────────
-export function FitnessApp({ initialSessions, initialFoodDb, initialGoals, initialNutritionDay }: Props) {
+export function FitnessApp({ initialSessions, initialFoodDb, initialCategories, initialGoals, initialNutritionDay }: Props) {
   const [tab, setTab]           = useState<TabId>('workout')
   const [sessions, setSessions] = useState<Session[]>(initialSessions)
   const [foodDb, setFoodDb]     = useState<Food[]>(initialFoodDb)
+  const [categories, setCategories] = useState<FoodCategory[]>(initialCategories)
   const [userGoals, setUserGoals] = useState<Goals>(initialGoals)
   const [nutritionDay, setNutritionDay] = useState<NutritionDay>(initialNutritionDay)
 
@@ -175,6 +178,19 @@ export function FitnessApp({ initialSessions, initialFoodDb, initialGoals, initi
   const deleteFoodFromDb = async (id: number) => {
     await foodActions.deleteFood(id)
     setFoodDb(prev => prev.filter(x => x.id !== id))
+  }
+  const addCategory = async (name: string) => {
+    const created = await categoryActions.createCategory(name)
+    setCategories(prev => [...prev, created])
+  }
+  const renameCategory = async (id: number, name: string) => {
+    const updated = await categoryActions.updateCategory(id, name)
+    setCategories(prev => prev.map(c => c.id === id ? updated : c))
+  }
+  const removeCategory = async (id: number) => {
+    await categoryActions.deleteCategory(id)
+    setCategories(prev => prev.filter(c => c.id !== id))
+    setFoodDb(prev => prev.map(f => f.categoryId === id ? { ...f, categoryId: undefined, categoryName: undefined } : f))
   }
 
   // ── Nutrition CRUD ────────────────────────────────────────
@@ -254,9 +270,13 @@ export function FitnessApp({ initialSessions, initialFoodDb, initialGoals, initi
           {tab === 'fooddb' && (
             <FoodDbTab
               foodDb={foodDb}
+              categories={categories}
               onAdd={addFoodToDb}
               onEdit={editFoodInDb}
               onDelete={deleteFoodFromDb}
+              onAddCategory={addCategory}
+              onRenameCategory={renameCategory}
+              onDeleteCategory={removeCategory}
             />
           )}
           {tab === 'settings' && (
