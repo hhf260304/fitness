@@ -27,13 +27,42 @@ function MuscleTag({ muscle, small }: { muscle: string; small?: boolean }) {
 }
 
 // ── ExerciseRow ───────────────────────────────────────────────
-function ExerciseRow({ exercise, onEdit }: { exercise: Exercise; onEdit: () => void }) {
+function ExerciseRow({
+  exercise, onEdit, dragListeners, dragAttributes,
+}: {
+  exercise: Exercise
+  onEdit: () => void
+  dragListeners?:  DraggableSyntheticListeners
+  dragAttributes?: React.HTMLAttributes<HTMLElement>
+}) {
   return (
     <div style={{
       display: 'flex', alignItems: 'center',
-      padding: '10px 14px', gap: 10,
+      padding: '10px 14px', gap: 8,
       borderBottom: `1px solid ${C.border}30`,
     }}>
+      {dragListeners && (
+        <div
+          {...dragListeners}
+          {...dragAttributes}
+          suppressHydrationWarning
+          onClick={e => e.stopPropagation()}
+          style={{
+            cursor: 'grab', color: C.textTer, flexShrink: 0,
+            display: 'flex', alignItems: 'center',
+            touchAction: 'none', padding: '4px 2px',
+          }}
+        >
+          <svg width="10" height="14" viewBox="0 0 10 14" fill="none">
+            <circle cx="2.5" cy="2"  r="1.5" fill="currentColor"/>
+            <circle cx="2.5" cy="7"  r="1.5" fill="currentColor"/>
+            <circle cx="2.5" cy="12" r="1.5" fill="currentColor"/>
+            <circle cx="7.5" cy="2"  r="1.5" fill="currentColor"/>
+            <circle cx="7.5" cy="7"  r="1.5" fill="currentColor"/>
+            <circle cx="7.5" cy="12" r="1.5" fill="currentColor"/>
+          </svg>
+        </div>
+      )}
       <div style={{
         width: 3, alignSelf: 'stretch', borderRadius: 2,
         background: MUSCLE_COLORS[exercise.muscle] || '#AAA', flexShrink: 0,
@@ -63,6 +92,46 @@ function ExerciseRow({ exercise, onEdit }: { exercise: Exercise; onEdit: () => v
         padding: '5px 12px', color: C.textSec, fontSize: 11, fontWeight: 700,
         cursor: 'pointer', flexShrink: 0,
       }}>編輯</button>
+    </div>
+  )
+}
+
+// ── SortableExerciseItem ──────────────────────────────────────
+function SortableExerciseItem({
+  exercise, isEditing, onEdit, onSave, onDelete,
+}: {
+  exercise: Exercise
+  isEditing: boolean
+  onEdit: () => void
+  onSave: (e: Exercise) => void
+  onDelete: () => void
+}) {
+  const {
+    attributes, listeners, setNodeRef,
+    transform, transition, isDragging,
+  } = useSortable({ id: exercise.id })
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={{
+        transform: CSS.Translate.toString(transform),
+        transition,
+        opacity:  isDragging ? 0.4 : 1,
+        position: 'relative' as const,
+        zIndex:   isDragging ? 10 : undefined,
+      }}
+    >
+      {isEditing ? (
+        <ExerciseEditCard exercise={exercise} onSave={onSave} onDelete={onDelete} />
+      ) : (
+        <ExerciseRow
+          exercise={exercise}
+          onEdit={onEdit}
+          dragListeners={listeners}
+          dragAttributes={attributes}
+        />
+      )}
     </div>
   )
 }
@@ -301,6 +370,20 @@ function SessionCard({
   const [editingName, setEditingName] = useState(false)
   const [nameInput,   setNameInput]   = useState(session.name)
 
+  const exSensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(TouchSensor,   { activationConstraint: { delay: 150, tolerance: 5 } }),
+  )
+
+  const handleExerciseDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event
+    if (!over || active.id === over.id) return
+    const oldIndex = session.exercises.findIndex(e => e.id === active.id)
+    const newIndex = session.exercises.findIndex(e => e.id === over.id)
+    if (oldIndex === -1 || newIndex === -1) return
+    onUpdate({ ...session, exercises: arrayMove(session.exercises, oldIndex, newIndex) })
+  }
+
   const muscles   = [...new Set(session.exercises.map(e => e.muscle))].slice(0, 4)
   const totalSets = session.exercises.reduce((s, e) => s + (e.sets || 0), 0)
 
@@ -446,18 +529,27 @@ function SessionCard({
               尚未新增動作
             </div>
           )}
-          {session.exercises.map(ex =>
-            editingId === ex.id ? (
-              <ExerciseEditCard key={ex.id} exercise={ex}
-                onSave={updated => { updateEx(ex.id, updated); setEditingId(null) }}
-                onDelete={() => { deleteEx(ex.id); setEditingId(null) }}
-              />
-            ) : (
-              <ExerciseRow key={ex.id} exercise={ex}
-                onEdit={() => setEditingId(prev => prev === ex.id ? null : ex.id)}
-              />
-            )
-          )}
+          <DndContext
+            sensors={exSensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleExerciseDragEnd}
+          >
+            <SortableContext
+              items={session.exercises.map(e => e.id)}
+              strategy={verticalListSortingStrategy}
+            >
+              {session.exercises.map(ex => (
+                <SortableExerciseItem
+                  key={ex.id}
+                  exercise={ex}
+                  isEditing={editingId === ex.id}
+                  onEdit={() => setEditingId(prev => prev === ex.id ? null : ex.id)}
+                  onSave={updated => { updateEx(ex.id, updated); setEditingId(null) }}
+                  onDelete={() => { deleteEx(ex.id); setEditingId(null) }}
+                />
+              ))}
+            </SortableContext>
+          </DndContext>
           <div style={{ padding: '8px 12px 12px', borderTop: `1px solid ${C.border}30` }}>
             <button onClick={() => setShowAddEx(true)} style={{
               width: '100%', background: C.accent + '10',

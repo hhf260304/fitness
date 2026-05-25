@@ -148,6 +148,7 @@ export function FitnessApp({ initialSessions, initialFoodDb, initialCategories, 
 
   // ── Session CRUD ──────────────────────────────────────────
   const updateSession = async (id: number, updated: Session) => {
+    setSessions(prev => prev.map(s => s.id === id ? updated : s))
     const result = await sessionActions.updateSession(id, updated)
     setSessions(prev => prev.map(s => s.id === id ? result : s))
   }
