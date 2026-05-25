@@ -380,7 +380,7 @@ function AddFoodModal({ onAdd, onClose, foodDb }: {
       <div style={{
         position: 'relative', background: C.surfaceHigh,
         borderRadius: 20, padding: '20px 20px 24px', zIndex: 1,
-        width: '100%', maxWidth: 430, maxHeight: '80dvh', display: 'flex', flexDirection: 'column',
+        width: '100%', maxWidth: 430, height: '40dvh', overflow: 'hidden', display: 'flex', flexDirection: 'column',
         boxShadow: '0 24px 48px rgba(0,0,0,0.5)',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>

@@ -65,7 +65,7 @@ export const mealFoods = pgTable('meal_foods', {
   catalogFoodId: integer('catalog_food_id').references(() => foodCatalog.id, { onDelete: 'set null' }),
   amountG:       numeric('amount_g', { precision: 8, scale: 1 }),
   name:          text('name').notNull(),
-  calories:      integer('calories').notNull(),
+  calories:      numeric('calories', { precision: 7, scale: 1 }).notNull(),
   protein:       numeric('protein', { precision: 6, scale: 1 }).notNull(),
   fat:           numeric('fat',     { precision: 6, scale: 1 }).notNull(),
   carbs:         numeric('carbs',   { precision: 6, scale: 1 }).notNull(),

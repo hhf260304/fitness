@@ -13,7 +13,7 @@ function toFood(row: typeof mealFoods.$inferSelect): Food {
     name:          row.name,
     catalogFoodId: row.catalogFoodId ?? undefined,
     amountG:       row.amountG != null ? Number(row.amountG) : undefined,
-    calories:      row.calories,
+    calories:      Number(row.calories),
     protein:       Number(row.protein),
     fat:           Number(row.fat),
     carbs:         Number(row.carbs),

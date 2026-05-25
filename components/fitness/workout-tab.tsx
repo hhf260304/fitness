@@ -343,6 +343,7 @@ function SessionCard({
           <div
             {...dragListeners}
             {...dragAttributes}
+            suppressHydrationWarning
             onClick={e => e.stopPropagation()}
             style={{
               cursor: 'grab', color: C.textTer, flexShrink: 0,
