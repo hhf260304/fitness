@@ -48,7 +48,7 @@ export async function createFood(data: Omit<Food, 'id'>): Promise<Food> {
     })
     .returning()
   const categoryName = data.categoryId
-    ? (await db.select().from(foodCategories).where(eq(foodCategories.id, data.categoryId)))[0]?.name
+    ? (await db.select().from(foodCategories).where(and(eq(foodCategories.id, data.categoryId), eq(foodCategories.userId, userId))))[0]?.name
     : null
   return toFood(inserted, categoryName)
 }
@@ -87,7 +87,7 @@ export async function updateFood(id: number, data: Omit<Food, 'id'>): Promise<Fo
   }
 
   const categoryName = updated.categoryId
-    ? (await db.select().from(foodCategories).where(eq(foodCategories.id, updated.categoryId)))[0]?.name
+    ? (await db.select().from(foodCategories).where(and(eq(foodCategories.id, updated.categoryId), eq(foodCategories.userId, userId))))[0]?.name
     : null
   return toFood(updated, categoryName)
 }

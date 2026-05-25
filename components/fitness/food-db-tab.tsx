@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import type { Food, FoodCategory } from '@/lib/types'
 import { C, MACRO_COLORS } from '@/lib/fitness-constants'
 import { CategoryManagerSheet } from '@/components/fitness/category-manager-sheet'
@@ -236,6 +236,15 @@ export function FoodDbTab({ foodDb, categories, onAdd, onEdit, onDelete, onAddCa
   const [editItem,             setEditItem]             = useState<Food | null>(null)
   const [selectedCategoryId,   setSelectedCategoryId]   = useState<number | null>(null)
   const [showCategoryManager,  setShowCategoryManager]  = useState(false)
+
+  // Reset category filter if the selected category is deleted
+  useEffect(() => {
+    if (selectedCategoryId !== null && selectedCategoryId !== -1) {
+      if (!categories.find(c => c.id === selectedCategoryId)) {
+        setSelectedCategoryId(null)
+      }
+    }
+  }, [categories, selectedCategoryId])
 
   const filtered = foodDb.filter(f => {
     const matchSearch   = f.name.toLowerCase().includes(search.toLowerCase())
