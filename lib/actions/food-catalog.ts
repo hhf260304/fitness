@@ -1,28 +1,36 @@
 'use server'
 
 import { db } from '@/lib/db'
-import { foodCatalog, mealFoods } from '@/lib/db/schema'
+import { foodCatalog, mealFoods, foodCategories } from '@/lib/db/schema'
 import { eq, and } from 'drizzle-orm'
 import type { Food } from '@/lib/types'
 import { verifySession } from '@/lib/session'
 
-function toFood(row: typeof foodCatalog.$inferSelect): Food {
+function toFood(
+  row: typeof foodCatalog.$inferSelect,
+  categoryName?: string | null,
+): Food {
   return {
-    id:          row.id,
-    name:        row.name,
-    servingSize: Number(row.servingSize),
-    calories:    Number(row.calories),
-    protein:     Number(row.protein),
-    fat:         Number(row.fat),
-    carbs:       Number(row.carbs),
-    sugar:       Number(row.sugar),
+    id:           row.id,
+    name:         row.name,
+    servingSize:  Number(row.servingSize),
+    calories:     Number(row.calories),
+    protein:      Number(row.protein),
+    fat:          Number(row.fat),
+    carbs:        Number(row.carbs),
+    categoryId:   row.categoryId ?? undefined,
+    categoryName: categoryName ?? undefined,
   }
 }
 
 export async function getFoods(): Promise<Food[]> {
   const { userId } = await verifySession()
-  const rows = await db.select().from(foodCatalog).where(eq(foodCatalog.userId, userId))
-  return rows.map(toFood)
+  const rows = await db
+    .select({ food: foodCatalog, categoryName: foodCategories.name })
+    .from(foodCatalog)
+    .leftJoin(foodCategories, eq(foodCatalog.categoryId, foodCategories.id))
+    .where(eq(foodCatalog.userId, userId))
+  return rows.map(r => toFood(r.food, r.categoryName))
 }
 
 export async function createFood(data: Omit<Food, 'id'>): Promise<Food> {
@@ -36,10 +44,13 @@ export async function createFood(data: Omit<Food, 'id'>): Promise<Food> {
       protein:     String(data.protein),
       fat:         String(data.fat),
       carbs:       String(data.carbs),
-      sugar:       String(data.sugar),
+      categoryId:  data.categoryId ?? null,
     })
     .returning()
-  return toFood(inserted)
+  const categoryName = data.categoryId
+    ? (await db.select().from(foodCategories).where(eq(foodCategories.id, data.categoryId)))[0]?.name
+    : null
+  return toFood(inserted, categoryName)
 }
 
 export async function updateFood(id: number, data: Omit<Food, 'id'>): Promise<Food> {
@@ -54,13 +65,12 @@ export async function updateFood(id: number, data: Omit<Food, 'id'>): Promise<Fo
       protein:     String(data.protein),
       fat:         String(data.fat),
       carbs:       String(data.carbs),
-      sugar:       String(data.sugar),
+      categoryId:  data.categoryId ?? null,
     })
     .where(and(eq(foodCatalog.id, id), eq(foodCatalog.userId, userId)))
     .returning()
   if (!updated) throw new Error(`Food ${id} not found`)
 
-  // 同步更新所有從此食物庫項目新增的飲食紀錄
   const linked = await db.select().from(mealFoods).where(eq(mealFoods.catalogFoodId, id))
   for (const row of linked) {
     const amt = Number(row.amountG)
@@ -72,12 +82,14 @@ export async function updateFood(id: number, data: Omit<Food, 'id'>): Promise<Fo
         protein:  String(Math.round(data.protein * amt / servingSize * 10) / 10),
         fat:      String(Math.round(data.fat      * amt / servingSize * 10) / 10),
         carbs:    String(Math.round(data.carbs    * amt / servingSize * 10) / 10),
-        sugar:    String(Math.round(data.sugar    * amt / servingSize * 10) / 10),
       })
       .where(eq(mealFoods.id, row.id))
   }
 
-  return toFood(updated)
+  const categoryName = updated.categoryId
+    ? (await db.select().from(foodCategories).where(eq(foodCategories.id, updated.categoryId)))[0]?.name
+    : null
+  return toFood(updated, categoryName)
 }
 
 export async function deleteFood(id: number): Promise<void> {
