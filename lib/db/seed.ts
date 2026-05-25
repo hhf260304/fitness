@@ -38,7 +38,6 @@ async function seed() {
       protein:  String(f.protein),
       fat:      String(f.fat),
       carbs:    String(f.carbs),
-      sugar:    String(f.sugar),
     }))
   )
 
@@ -50,7 +49,6 @@ async function seed() {
       protein:  day.goals.protein,
       fat:      day.goals.fat,
       carbs:    day.goals.carbs,
-      sugar:    day.goals.sugar,
     }).onConflictDoNothing()
 
     for (const meal of day.meals) {
@@ -69,7 +67,6 @@ async function seed() {
             protein:  String(f.protein),
             fat:      String(f.fat),
             carbs:    String(f.carbs),
-            sugar:    String(f.sugar),
           }))
         )
       }
@@ -84,7 +81,6 @@ async function seed() {
     protein:  DEFAULT_GOALS.protein,
     fat:      DEFAULT_GOALS.fat,
     carbs:    DEFAULT_GOALS.carbs,
-    sugar:    DEFAULT_GOALS.sugar,
   }).onConflictDoNothing()
 
   console.log('Seed complete.')

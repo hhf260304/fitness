@@ -17,7 +17,6 @@ function toFood(row: typeof mealFoods.$inferSelect): Food {
     protein:       Number(row.protein),
     fat:           Number(row.fat),
     carbs:         Number(row.carbs),
-    sugar:         Number(row.sugar),
   }
 }
 
@@ -57,7 +56,6 @@ export async function getGoals(date: string): Promise<Goals> {
     protein:  row.protein,
     fat:      row.fat,
     carbs:    row.carbs,
-    sugar:    row.sugar,
   }
 }
 
@@ -67,7 +65,7 @@ export async function upsertGoals(date: string, data: Goals): Promise<void> {
     .values({ date, userId, ...data })
     .onConflictDoUpdate({
       target: [goals.userId, goals.date],
-      set:    { calories: data.calories, protein: data.protein, fat: data.fat, carbs: data.carbs, sugar: data.sugar },
+      set:    { calories: data.calories, protein: data.protein, fat: data.fat, carbs: data.carbs },
     })
 }
 
@@ -89,7 +87,6 @@ export async function createMeal(date: string, data: Omit<Meal, 'id'>): Promise<
         protein:       String(f.protein),
         fat:           String(f.fat),
         carbs:         String(f.carbs),
-        sugar:         String(f.sugar),
       }))
     )
   }
@@ -115,7 +112,6 @@ export async function updateMeal(id: number, data: Omit<Meal, 'id'>): Promise<Me
         protein:       String(f.protein),
         fat:           String(f.fat),
         carbs:         String(f.carbs),
-        sugar:         String(f.sugar),
       }))
     )
   }

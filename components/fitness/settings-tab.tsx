@@ -76,7 +76,6 @@ function MacroRing({ goals }: { goals: Goals }) {
   const protCal  = goals.protein * 4
   const fatCal   = goals.fat * 9
   const carbCal  = goals.carbs * 4
-  const sugarCal = goals.sugar * 4
   const total    = protCal + fatCal + carbCal || 1
 
   const r = 46, cx = 56, cy = 56, stroke = 14
@@ -143,16 +142,6 @@ function MacroRing({ goals }: { goals: Goals }) {
             </span>
           </div>
         ))}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-          <div style={{ width: 8, height: 8, borderRadius: '50%', background: MACRO_COLORS.sugar, flexShrink: 0 }} />
-          <span style={{ fontSize: 12, color: C.textSec, flex: 1 }}>糖</span>
-          <span style={{ fontSize: 13, fontWeight: 800, color: C.text, fontVariantNumeric: 'tabular-nums' }}>
-            {goals.sugar}g
-          </span>
-          <span style={{ fontSize: 10, color: C.textSec, width: 30, textAlign: 'right' as const }}>
-            {(sugarCal / total * 100).toFixed(0)}%
-          </span>
-        </div>
       </div>
     </div>
   )
@@ -185,7 +174,6 @@ export function SettingsTab({ goals, onSave }: {
     { field: 'protein',  label: '蛋白質目標', unit: '每日 g',    color: MACRO_COLORS.protein },
     { field: 'fat',      label: '脂肪目標',   unit: '每日 g',    color: MACRO_COLORS.fat     },
     { field: 'carbs',    label: '碳水目標',   unit: '每日 g',    color: MACRO_COLORS.carbs   },
-    { field: 'sugar',    label: '糖目標',     unit: '每日 g',    color: MACRO_COLORS.sugar   },
   ]
 
   return (

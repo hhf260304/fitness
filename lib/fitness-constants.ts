@@ -27,7 +27,6 @@ export const MACRO_COLORS = {
   protein: '#1A6FAA',
   fat:     '#C44022',
   carbs:   '#8B6500',
-  sugar:   '#B02060',
 }
 
 export const MUSCLES = ['胸', '背', '腿', '肩', '二頭', '三頭', '核心', '全身'] as const

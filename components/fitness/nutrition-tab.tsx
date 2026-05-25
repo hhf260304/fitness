@@ -85,7 +85,6 @@ function MacroSummary({ totals, goals }: {
         <MacroRow label="蛋白質" value={totals.protein} goal={goals.protein} color={MACRO_COLORS.protein} />
         <MacroRow label="脂肪"   value={totals.fat}     goal={goals.fat}     color={MACRO_COLORS.fat} />
         <MacroRow label="碳水"   value={totals.carbs}   goal={goals.carbs}   color={MACRO_COLORS.carbs} />
-        <MacroRow label="糖"     value={totals.sugar}   goal={goals.sugar}   color={MACRO_COLORS.sugar} />
       </div>
     </div>
   )
@@ -112,7 +111,6 @@ function FoodRow({ food, isEditing, onEdit, onDelete }: {
           <span style={{ color: MACRO_COLORS.protein }}>蛋白 {fmt(food.protein)}g</span>
           <span style={{ color: MACRO_COLORS.fat     }}>脂肪 {fmt(food.fat)}g</span>
           <span style={{ color: MACRO_COLORS.carbs   }}>碳水 {fmt(food.carbs)}g</span>
-          <span style={{ color: MACRO_COLORS.sugar   }}>糖 {fmt(food.sugar)}g</span>
         </div>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0, marginLeft: 10 }}>
@@ -156,7 +154,6 @@ function EditFoodSheet({ food, foodDb, onSave, onClose }: {
     protein:  String(food.protein),
     fat:      String(food.fat),
     carbs:    String(food.carbs),
-    sugar:    String(food.sugar),
   })
   const setF = (k: keyof typeof form, v: string) => setForm(p => ({ ...p, [k]: v }))
 
@@ -166,7 +163,6 @@ function EditFoodSheet({ food, foodDb, onSave, onClose }: {
     protein:  Math.round(catalogFood.protein  * amt / base * 10) / 10,
     fat:      Math.round(catalogFood.fat      * amt / base * 10) / 10,
     carbs:    Math.round(catalogFood.carbs    * amt / base * 10) / 10,
-    sugar:    Math.round(catalogFood.sugar    * amt / base * 10) / 10,
   } : null
 
   const handleSave = () => {
@@ -182,7 +178,6 @@ function EditFoodSheet({ food, foodDb, onSave, onClose }: {
         protein:  parseFloat(form.protein)  || 0,
         fat:      parseFloat(form.fat)      || 0,
         carbs:    parseFloat(form.carbs)    || 0,
-        sugar:    parseFloat(form.sugar)    || 0,
       })
     }
   }
@@ -250,7 +245,6 @@ function EditFoodSheet({ food, foodDb, onSave, onClose }: {
                   <span style={{ color: MACRO_COLORS.protein, fontWeight: 700 }}>蛋白 {calc.protein}g</span>
                   <span style={{ color: MACRO_COLORS.fat,     fontWeight: 700 }}>脂肪 {calc.fat}g</span>
                   <span style={{ color: MACRO_COLORS.carbs,   fontWeight: 700 }}>碳水 {calc.carbs}g</span>
-                  <span style={{ color: MACRO_COLORS.sugar,   fontWeight: 700 }}>糖 {calc.sugar}g</span>
                 </div>
               </div>
             )}
@@ -274,7 +268,6 @@ function EditFoodSheet({ food, foodDb, onSave, onClose }: {
                 ['protein',  '蛋白質 g',  MACRO_COLORS.protein],
                 ['fat',      '脂肪 g',    MACRO_COLORS.fat],
                 ['carbs',    '碳水 g',    MACRO_COLORS.carbs],
-                ['sugar',    '糖 g',      MACRO_COLORS.sugar],
               ] as const).map(([field, label, color]) => (
                 <div key={field} style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
                   <label style={{ fontSize: 10, color, fontWeight: 700, letterSpacing: '0.4px', textTransform: 'uppercase' as const }}>{label}</label>
@@ -318,7 +311,7 @@ function AddFoodSheet({ onAdd, onClose, foodDb }: {
   const [selected, setSelected] = useState<Food | null>(null)
   const [amount, setAmount]     = useState('')
   const [form, setForm]         = useState({
-    name: '', calories: '', protein: '', fat: '', carbs: '', sugar: '',
+    name: '', calories: '', protein: '', fat: '', carbs: '',
   })
   const set = (k: keyof typeof form, v: string) => setForm(prev => ({ ...prev, [k]: v }))
 
@@ -329,7 +322,6 @@ function AddFoodSheet({ onAdd, onClose, foodDb }: {
     protein:  Math.round(selected.protein  * amt / base * 10) / 10,
     fat:      Math.round(selected.fat      * amt / base * 10) / 10,
     carbs:    Math.round(selected.carbs    * amt / base * 10) / 10,
-    sugar:    Math.round(selected.sugar    * amt / base * 10) / 10,
   } : null
 
   const handleAddFromDb = () => {
@@ -343,7 +335,6 @@ function AddFoodSheet({ onAdd, onClose, foodDb }: {
       protein:       calc.protein,
       fat:           calc.fat,
       carbs:         calc.carbs,
-      sugar:         calc.sugar,
     })
   }
 
@@ -356,7 +347,6 @@ function AddFoodSheet({ onAdd, onClose, foodDb }: {
       protein:  parseFloat(form.protein)  || 0,
       fat:      parseFloat(form.fat)      || 0,
       carbs:    parseFloat(form.carbs)    || 0,
-      sugar:    parseFloat(form.sugar)    || 0,
     })
   }
 
@@ -509,7 +499,6 @@ function AddFoodSheet({ onAdd, onClose, foodDb }: {
                   <span style={{ color: MACRO_COLORS.protein, fontWeight: 700 }}>蛋白 {calc.protein}g</span>
                   <span style={{ color: MACRO_COLORS.fat,     fontWeight: 700 }}>脂肪 {calc.fat}g</span>
                   <span style={{ color: MACRO_COLORS.carbs,   fontWeight: 700 }}>碳水 {calc.carbs}g</span>
-                  <span style={{ color: MACRO_COLORS.sugar,   fontWeight: 700 }}>糖 {calc.sugar}g</span>
                 </div>
               </div>
             )}
@@ -543,7 +532,6 @@ function AddFoodSheet({ onAdd, onClose, foodDb }: {
               {numInp('protein',  '蛋白質 g',  MACRO_COLORS.protein)}
               {numInp('fat',      '脂肪 g',    MACRO_COLORS.fat)}
               {numInp('carbs',    '碳水 g',    MACRO_COLORS.carbs)}
-              {numInp('sugar',    '糖 g',      MACRO_COLORS.sugar)}
             </div>
             <button onClick={handleAddManual} disabled={!manualValid} style={{
               width: '100%', background: manualValid ? C.orange : C.border,
@@ -863,10 +851,10 @@ export function NutritionTab({ nutritionDay, onUpdateMeal, onAddMeal, onDeleteMe
   const totals = meals.reduce((acc, meal) => {
     meal.foods.forEach(f => {
       acc.calories += f.calories; acc.protein += f.protein
-      acc.fat += f.fat; acc.carbs += f.carbs; acc.sugar += f.sugar
+      acc.fat += f.fat; acc.carbs += f.carbs
     })
     return acc
-  }, { calories: 0, protein: 0, fat: 0, carbs: 0, sugar: 0 })
+  }, { calories: 0, protein: 0, fat: 0, carbs: 0 })
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
