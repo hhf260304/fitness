@@ -28,7 +28,8 @@ export type Food = {
   protein: number
   fat: number
   carbs: number
-  sugar: number
+  categoryId?: number | null
+  categoryName?: string | null
 }
 
 export type Meal = {
@@ -43,7 +44,6 @@ export type Goals = {
   protein: number
   fat: number
   carbs: number
-  sugar: number
 }
 
 export type NutritionDay = {
@@ -52,3 +52,8 @@ export type NutritionDay = {
 }
 
 export type TabId = 'workout' | 'nutrition' | 'fooddb' | 'settings'
+
+export type FoodCategory = {
+  id: number
+  name: string
+}
