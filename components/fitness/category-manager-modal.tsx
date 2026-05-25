@@ -4,7 +4,7 @@ import { useState } from 'react'
 import type { FoodCategory } from '@/lib/types'
 import { C } from '@/lib/fitness-constants'
 
-export function CategoryManagerSheet({
+export function CategoryManagerModal({
   categories,
   onAdd,
   onRename,
@@ -42,14 +42,13 @@ export function CategoryManagerSheet({
   }
 
   return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 100, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
-      <div onClick={onClose} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.6)' }} />
+    <div style={{ position: 'fixed', inset: 0, zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
+      <div onClick={onClose} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.72)' }} />
       <div style={{
-        position: 'relative', background: C.bg,
-        borderRadius: '20px 20px 0 0', padding: '20px 20px 32px',
+        position: 'relative', background: C.surfaceHigh,
+        borderRadius: 20, padding: '20px 20px 24px', zIndex: 1,
         width: '100%', maxWidth: 430,
-        boxShadow: '0 -8px 40px rgba(0,0,0,0.2)',
-        maxHeight: '70dvh', display: 'flex', flexDirection: 'column',
+        boxShadow: '0 24px 48px rgba(0,0,0,0.5)',
       }}>
         {/* 標題列 */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
@@ -62,7 +61,7 @@ export function CategoryManagerSheet({
         </div>
 
         {/* 分類列表 */}
-        <div style={{ flex: 1, overflowY: 'auto', marginBottom: 14 }}>
+        <div style={{ marginBottom: 14 }}>
           {categories.length === 0 && (
             <div style={{ textAlign: 'center', color: C.textSec, fontSize: 13, padding: '24px 0' }}>尚未建立任何分類</div>
           )}

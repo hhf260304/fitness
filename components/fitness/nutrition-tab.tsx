@@ -137,8 +137,8 @@ function FoodRow({ food, isEditing, onEdit, onDelete }: {
   )
 }
 
-// ── EditFoodSheet ─────────────────────────────────────────────
-function EditFoodSheet({ food, foodDb, onSave, onClose }: {
+// ── EditFoodModal ─────────────────────────────────────────────
+function EditFoodModal({ food, foodDb, onSave, onClose }: {
   food: Food
   foodDb: Food[]
   onSave: (f: Food) => void
@@ -189,7 +189,7 @@ function EditFoodSheet({ food, foodDb, onSave, onClose }: {
       <div onClick={onClose} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.72)' }} />
       <div style={{
         position: 'relative', background: C.surfaceHigh, borderRadius: 20,
-        padding: '20px 20px 24px', zIndex: 1, width: '100%',
+        padding: '20px 20px 24px', zIndex: 1, width: '100%', maxWidth: 430,
         boxShadow: '0 24px 48px rgba(0,0,0,0.5)',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
@@ -300,8 +300,8 @@ function EditFoodSheet({ food, foodDb, onSave, onClose }: {
   )
 }
 
-// ── AddFoodSheet ──────────────────────────────────────────────
-function AddFoodSheet({ onAdd, onClose, foodDb }: {
+// ── AddFoodModal ──────────────────────────────────────────────
+function AddFoodModal({ onAdd, onClose, foodDb }: {
   onAdd: (f: Food) => void
   onClose: () => void
   foodDb: Food[]
@@ -380,7 +380,7 @@ function AddFoodSheet({ onAdd, onClose, foodDb }: {
       <div style={{
         position: 'relative', background: C.surfaceHigh,
         borderRadius: 20, padding: '20px 20px 24px', zIndex: 1,
-        width: '100%', maxHeight: '80vh', display: 'flex', flexDirection: 'column',
+        width: '100%', maxWidth: 430, maxHeight: '80dvh', display: 'flex', flexDirection: 'column',
         boxShadow: '0 24px 48px rgba(0,0,0,0.5)',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
@@ -546,8 +546,8 @@ function AddFoodSheet({ onAdd, onClose, foodDb }: {
   )
 }
 
-// ── MealSheet ─────────────────────────────────────────────────
-function MealSheet({ initial, onSave, onClose }: {
+// ── MealModal ─────────────────────────────────────────────────
+function MealModal({ initial, onSave, onClose }: {
   initial?: Pick<Meal, 'name' | 'time'>
   onSave: (name: string, time: string) => void
   onClose: () => void
@@ -564,7 +564,7 @@ function MealSheet({ initial, onSave, onClose }: {
       <div style={{
         position: 'relative', background: C.surfaceHigh,
         borderRadius: 20, padding: '20px 20px 24px', zIndex: 1,
-        width: '100%', boxShadow: '0 24px 48px rgba(0,0,0,0.5)',
+        width: '100%', maxWidth: 430, boxShadow: '0 24px 48px rgba(0,0,0,0.5)',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
           <div style={{ fontSize: 17, fontWeight: 800, color: C.text }}>
@@ -577,31 +577,21 @@ function MealSheet({ initial, onSave, onClose }: {
           }}>×</button>
         </div>
 
-        <div style={{ display: 'flex', flexWrap: 'wrap' as const, gap: 7, marginBottom: 14 }}>
-          {presets.map(p => {
-            const sel = name === p
-            return (
-              <button key={p} onClick={() => setName(p)} style={{
-                background: sel ? C.orange + '25' : C.surface,
-                color: sel ? C.orange : C.textSec,
-                border: `1px solid ${sel ? C.orange + '60' : C.border}`,
-                borderRadius: 99, padding: '6px 13px', fontSize: 12, fontWeight: 700, cursor: 'pointer',
-              }}>{p}</button>
-            )
-          })}
-        </div>
-
         <div style={{ marginBottom: 12 }}>
-          <label style={{ fontSize: 11, color: C.textSec, fontWeight: 700, letterSpacing: '0.5px', display: 'block', marginBottom: 6 }}>餐點名稱</label>
+          <label style={{ fontSize: 11, color: C.textSec, fontWeight: 700, letterSpacing: '0.5px', display: 'block', marginBottom: 6 }}>標籤</label>
           <input
             value={name} onChange={e => setName(e.target.value)}
-            placeholder="自訂名稱…"
+            placeholder="早餐、午餐…"
+            list="meal-presets"
             style={{
               width: '100%', background: C.surface, border: `1px solid ${C.border}`,
               borderRadius: 10, padding: '11px 14px', color: C.text, fontSize: 14,
               outline: 'none', boxSizing: 'border-box' as const,
             }}
           />
+          <datalist id="meal-presets">
+            {presets.map(p => <option key={p} value={p} />)}
+          </datalist>
         </div>
 
         <div style={{ marginBottom: 22 }}>
@@ -779,11 +769,11 @@ function MealSection({ meal, onUpdate, onDelete, foodDb, dragListeners, dragAttr
       )}
 
       {showAdd && (
-        <AddFoodSheet onAdd={addFood} onClose={() => setShowAdd(false)} foodDb={foodDb} />
+        <AddFoodModal onAdd={addFood} onClose={() => setShowAdd(false)} foodDb={foodDb} />
       )}
 
       {editingFood && (
-        <EditFoodSheet
+        <EditFoodModal
           food={editingFood} foodDb={foodDb}
           onSave={editFood}
           onClose={() => setEditingFood(null)}
@@ -791,7 +781,7 @@ function MealSection({ meal, onUpdate, onDelete, foodDb, dragListeners, dragAttr
       )}
 
       {showMealEdit && (
-        <MealSheet
+        <MealModal
           initial={{ name: meal.name, time: meal.time }}
           onSave={(name, time) => { onUpdate({ ...meal, name, time }); setShowMealEdit(false) }}
           onClose={() => setShowMealEdit(false)}
@@ -900,7 +890,7 @@ export function NutritionTab({ nutritionDay, onUpdateMeal, onAddMeal, onDeleteMe
       </div>
 
       {showAddMeal && (
-        <MealSheet
+        <MealModal
           onSave={(name, time) => { onAddMeal({ id: Date.now(), name, time, foods: [] }); setShowAddMeal(false) }}
           onClose={() => setShowAddMeal(false)}
         />

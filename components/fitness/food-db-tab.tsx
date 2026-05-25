@@ -3,10 +3,10 @@
 import { useState, useEffect } from 'react'
 import type { Food, FoodCategory } from '@/lib/types'
 import { C, MACRO_COLORS } from '@/lib/fitness-constants'
-import { CategoryManagerSheet } from '@/components/fitness/category-manager-sheet'
+import { CategoryManagerModal } from '@/components/fitness/category-manager-modal'
 
-// ── FoodFormSheet ─────────────────────────────────────────────
-function FoodFormSheet({ initial, onSave, onClose, title, categories }: {
+// ── FoodFormModal ─────────────────────────────────────────────
+function FoodFormModal({ initial, onSave, onClose, title, categories }: {
   initial?: Food
   onSave: (f: Food) => void
   onClose: () => void
@@ -352,7 +352,7 @@ export function FoodDbTab({ foodDb, categories, onAdd, onEdit, onDelete, onAddCa
       </div>
 
       {showForm && (
-        <FoodFormSheet
+        <FoodFormModal
           initial={editItem ?? undefined}
           title={editItem ? '編輯食物' : '新增食物'}
           categories={categories}
@@ -367,7 +367,7 @@ export function FoodDbTab({ foodDb, categories, onAdd, onEdit, onDelete, onAddCa
       )}
 
       {showCategoryManager && (
-        <CategoryManagerSheet
+        <CategoryManagerModal
           categories={categories}
           onAdd={onAddCategory}
           onRename={onRenameCategory}

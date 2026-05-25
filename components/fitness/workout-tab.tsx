@@ -165,8 +165,8 @@ function ExerciseEditCard({
   )
 }
 
-// ── AddExerciseSheet ──────────────────────────────────────────
-function AddExerciseSheet({
+// ── AddExerciseModal ──────────────────────────────────────────
+function AddExerciseModal({
   onAdd, onClose,
 }: {
   onAdd: (e: Exercise) => void
@@ -220,7 +220,7 @@ function AddExerciseSheet({
       <div style={{
         position: 'relative', background: C.surfaceHigh,
         borderRadius: 20, padding: '20px 20px 24px', zIndex: 1,
-        width: '100%', maxHeight: '85dvh', overflowY: 'auto',
+        width: '100%', maxWidth: 430, maxHeight: '85dvh', overflowY: 'auto',
         boxShadow: '0 24px 48px rgba(0,0,0,0.5)',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
@@ -465,7 +465,7 @@ function SessionCard({
             }}>+ 新增動作</button>
           </div>
           {showAddEx && (
-            <AddExerciseSheet
+            <AddExerciseModal
               onAdd={ex => { addEx(ex); setShowAddEx(false) }}
               onClose={() => setShowAddEx(false)}
             />
@@ -511,8 +511,8 @@ function SortableSessionCard({
   )
 }
 
-// ── AddSessionSheet ───────────────────────────────────────────
-function AddSessionSheet({
+// ── AddSessionModal ───────────────────────────────────────────
+function AddSessionModal({
   onAdd, onClose,
 }: {
   onAdd: (s: Session) => void
@@ -527,7 +527,7 @@ function AddSessionSheet({
       <div style={{
         position: 'relative', background: C.surfaceHigh,
         borderRadius: 20, padding: '20px 20px 24px', zIndex: 1,
-        width: '100%', boxShadow: '0 24px 48px rgba(0,0,0,0.5)',
+        width: '100%', maxWidth: 430, boxShadow: '0 24px 48px rgba(0,0,0,0.5)',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
           <div style={{ fontSize: 17, fontWeight: 800, color: C.text }}>新建訓練</div>
@@ -638,7 +638,7 @@ export function WorkoutTab({
       </div>
 
       {showAdd && (
-        <AddSessionSheet
+        <AddSessionModal
           onAdd={s => { onAddSession(s); setShowAdd(false) }}
           onClose={() => setShowAdd(false)}
         />
