@@ -1,26 +1,29 @@
 'use client'
 
 import { useState } from 'react'
-import type { Food } from '@/lib/types'
+import type { Food, FoodCategory } from '@/lib/types'
 import { C, MACRO_COLORS } from '@/lib/fitness-constants'
+import { CategoryManagerSheet } from '@/components/fitness/category-manager-sheet'
 
 // ── FoodFormSheet ─────────────────────────────────────────────
-function FoodFormSheet({ initial, onSave, onClose, title }: {
+function FoodFormSheet({ initial, onSave, onClose, title, categories }: {
   initial?: Food
   onSave: (f: Food) => void
   onClose: () => void
   title: string
+  categories: FoodCategory[]
 }) {
   const [form, setForm] = useState({
     name:        initial?.name                    ?? '',
-    servingSize: initial ? String(initial.servingSize) : '100',
+    servingSize: initial ? String(initial.servingSize) : '',
     calories:    initial ? String(initial.calories)    : '',
     protein:     initial ? String(initial.protein)     : '',
     fat:         initial ? String(initial.fat)          : '',
     carbs:       initial ? String(initial.carbs)        : '',
-    sugar:       initial ? String(initial.sugar)        : '',
+    categoryId:  initial?.categoryId ?? null as number | null,
   })
-  const set = (k: keyof typeof form, v: string) => setForm(prev => ({ ...prev, [k]: v }))
+  type StringField = 'name' | 'servingSize' | 'calories' | 'protein' | 'fat' | 'carbs'
+  const set = (k: StringField, v: string) => setForm(prev => ({ ...prev, [k]: v }))
   const valid = form.name.trim() && form.calories && parseFloat(form.servingSize) > 0
 
   const sanitizeNum = (v: string) => {
@@ -31,7 +34,7 @@ function FoodFormSheet({ initial, onSave, onClose, title }: {
     return s
   }
 
-  const numInp = (field: keyof typeof form, label: string, color: string) => (
+  const numInp = (field: StringField, label: string, color: string) => (
     <div key={field} style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
       <label style={{ fontSize: 10, color, fontWeight: 700, letterSpacing: '0.4px', textTransform: 'uppercase' as const }}>
         {label}
@@ -57,7 +60,7 @@ function FoodFormSheet({ initial, onSave, onClose, title }: {
       <div style={{
         position: 'relative', background: C.surfaceHigh,
         borderRadius: 20, padding: '20px 20px 24px', zIndex: 1,
-        width: '100%', boxShadow: '0 24px 48px rgba(0,0,0,0.5)',
+        width: '100%', maxWidth: 430, boxShadow: '0 24px 48px rgba(0,0,0,0.5)',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
           <div style={{ fontSize: 17, fontWeight: 800, color: C.text }}>{title}</div>
@@ -72,7 +75,7 @@ function FoodFormSheet({ initial, onSave, onClose, title }: {
           <label style={{ fontSize: 11, color: C.textSec, fontWeight: 700, letterSpacing: '0.5px', display: 'block', marginBottom: 6 }}>食物名稱</label>
           <input
             value={form.name} onChange={e => set('name', e.target.value)}
-            placeholder="例：雞胸肉、全脂牛奶…"
+            placeholder=""
             autoFocus
             style={{
               width: '100%', background: C.surface, border: `1px solid ${C.border}`,
@@ -82,32 +85,53 @@ function FoodFormSheet({ initial, onSave, onClose, title }: {
           />
         </div>
 
+        <div style={{ marginBottom: 12 }}>
+          <label style={{ fontSize: 11, color: C.textSec, fontWeight: 700, letterSpacing: '0.5px', display: 'block', marginBottom: 6 }}>
+            分類（選填）
+          </label>
+          <select
+            value={form.categoryId ?? ''}
+            onChange={e => setForm(prev => ({ ...prev, categoryId: e.target.value ? Number(e.target.value) : null }))}
+            style={{
+              width: '100%', background: C.surface, border: `1px solid ${C.border}`,
+              borderRadius: 10, padding: '9px 14px', color: form.categoryId ? C.text : C.textSec,
+              fontSize: 13, outline: 'none', boxSizing: 'border-box' as const, appearance: 'none' as const,
+            }}
+          >
+            <option value="">未分類</option>
+            {categories.map(c => (
+              <option key={c.id} value={c.id}>{c.name}</option>
+            ))}
+          </select>
+        </div>
+
         <div style={{ marginBottom: 14 }}>
           <label style={{ fontSize: 11, color: C.textSec, fontWeight: 700, letterSpacing: '0.5px', display: 'block', marginBottom: 6 }}>
             基準份量（g / ml）
           </label>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <input
-              type="number" step="1" min="1" value={form.servingSize}
-              onChange={e => set('servingSize', e.target.value)}
-              placeholder="100"
-              style={{
-                flex: 1, background: C.surface, border: `1px solid ${C.border}`,
-                borderRadius: 10, padding: '9px 14px', color: C.text, fontSize: 15,
-                fontWeight: 700, outline: 'none', fontVariantNumeric: 'tabular-nums',
-              }}
-            />
-            <span style={{ fontSize: 13, color: C.textSec, fontWeight: 600, flexShrink: 0 }}>g / ml</span>
-          </div>
+          <input
+            type="number" step="1" min="1" value={form.servingSize}
+            onChange={e => set('servingSize', e.target.value)}
+            placeholder=""
+            style={{
+              width: '100%', background: C.surface, border: `1px solid ${C.border}`,
+              borderRadius: 10, padding: '9px 14px', color: C.text, fontSize: 15,
+              fontWeight: 700, outline: 'none', fontVariantNumeric: 'tabular-nums',
+              boxSizing: 'border-box' as const,
+            }}
+          />
           <div style={{ fontSize: 10, color: C.textTer, marginTop: 4 }}>以下營養數值對應此份量</div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 20 }}>
-          {numInp('calories', '熱量 kcal', C.orange)}
-          {numInp('protein',  '蛋白質 g',  MACRO_COLORS.protein)}
-          {numInp('fat',      '脂肪 g',    MACRO_COLORS.fat)}
-          {numInp('carbs',    '碳水 g',    MACRO_COLORS.carbs)}
-          {numInp('sugar',    '糖 g',      MACRO_COLORS.sugar)}
+        <div style={{ marginBottom: 20 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 10, marginBottom: 10 }}>
+            {numInp('calories', '熱量 kcal', C.orange)}
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
+            {numInp('protein', '蛋白質 g', MACRO_COLORS.protein)}
+            {numInp('fat',     '脂肪 g',   MACRO_COLORS.fat)}
+            {numInp('carbs',   '碳水 g',   MACRO_COLORS.carbs)}
+          </div>
         </div>
 
         <button
@@ -121,7 +145,7 @@ function FoodFormSheet({ initial, onSave, onClose, title }: {
               protein:     parseFloat(form.protein)  || 0,
               fat:         parseFloat(form.fat)       || 0,
               carbs:       parseFloat(form.carbs)     || 0,
-              sugar:       parseFloat(form.sugar)     || 0,
+              categoryId:  form.categoryId ?? undefined,
             })
           }}
           disabled={!valid}
@@ -153,13 +177,23 @@ function FoodDbCard({ food, onEdit, onDelete }: {
             overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
           }}>{food.name}</span>
           <span style={{ fontSize: 11, color: C.textSec, fontWeight: 600, flexShrink: 0 }}>每 {food.servingSize ?? 100}g/ml</span>
+          {food.categoryName ? (
+            <span style={{
+              fontSize: 9, fontWeight: 700, padding: '2px 7px', borderRadius: 20, flexShrink: 0,
+              background: C.orange + '18', color: C.orange,
+            }}>{food.categoryName}</span>
+          ) : (
+            <span style={{
+              fontSize: 9, fontWeight: 600, padding: '2px 7px', borderRadius: 20, flexShrink: 0,
+              background: C.border, color: C.textSec,
+            }}>未分類</span>
+          )}
         </div>
         <div style={{ display: 'flex', gap: 8, fontSize: 11, fontVariantNumeric: 'tabular-nums', flexWrap: 'wrap' as const }}>
           <span style={{ color: C.orange, fontWeight: 800 }}>熱量 {food.calories} kcal</span>
           <span style={{ color: MACRO_COLORS.protein }}>蛋白 {food.protein}g</span>
           <span style={{ color: MACRO_COLORS.fat     }}>脂肪 {food.fat}g</span>
           <span style={{ color: MACRO_COLORS.carbs   }}>碳水 {food.carbs}g</span>
-          <span style={{ color: MACRO_COLORS.sugar   }}>糖 {food.sugar}g</span>
         </div>
       </div>
       <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
@@ -187,17 +221,31 @@ function FoodDbCard({ food, onEdit, onDelete }: {
 }
 
 // ── FoodDbTab ─────────────────────────────────────────────────
-export function FoodDbTab({ foodDb, onAdd, onEdit, onDelete }: {
+export function FoodDbTab({ foodDb, categories, onAdd, onEdit, onDelete, onAddCategory, onRenameCategory, onDeleteCategory }: {
   foodDb: Food[]
+  categories: FoodCategory[]
   onAdd: (f: Food) => void
   onEdit: (f: Food) => void
   onDelete: (id: number) => void
+  onAddCategory: (name: string) => void
+  onRenameCategory: (id: number, name: string) => void
+  onDeleteCategory: (id: number) => void
 }) {
-  const [search,   setSearch]   = useState('')
-  const [showForm, setShowForm] = useState(false)
-  const [editItem, setEditItem] = useState<Food | null>(null)
+  const [search,               setSearch]               = useState('')
+  const [showForm,             setShowForm]             = useState(false)
+  const [editItem,             setEditItem]             = useState<Food | null>(null)
+  const [selectedCategoryId,   setSelectedCategoryId]   = useState<number | null>(null)
+  const [showCategoryManager,  setShowCategoryManager]  = useState(false)
 
-  const filtered = foodDb.filter(f => f.name.toLowerCase().includes(search.toLowerCase()))
+  const filtered = foodDb.filter(f => {
+    const matchSearch   = f.name.toLowerCase().includes(search.toLowerCase())
+    const matchCategory = selectedCategoryId === null
+      ? true
+      : selectedCategoryId === -1
+        ? !f.categoryId
+        : f.categoryId === selectedCategoryId
+    return matchSearch && matchCategory
+  })
 
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
@@ -229,8 +277,37 @@ export function FoodDbTab({ foodDb, onAdd, onEdit, onDelete }: {
           </div>
         </div>
 
-        <div style={{ padding: '4px 18px 10px', fontSize: 11, color: C.textSec, fontWeight: 500 }}>
-          共 {foodDb.length} 項食物{search ? `，搜尋到 ${filtered.length} 項` : ''}
+        {/* 分類 Chip 列 */}
+        {categories.length > 0 && (
+          <div style={{ padding: '4px 16px 2px', display: 'flex', gap: 6, overflowX: 'auto', WebkitOverflowScrolling: 'touch' as any }}>
+            {[
+              { id: null,  label: '全部' },
+              ...categories.map(c => ({ id: c.id as number | null, label: c.name })),
+              { id: -1 as number | null, label: '未分類' },
+            ].map(chip => (
+              <button
+                key={chip.id ?? 'all'}
+                onClick={() => setSelectedCategoryId(chip.id)}
+                style={{
+                  background: selectedCategoryId === chip.id ? C.orange : C.surface,
+                  color: selectedCategoryId === chip.id ? '#fff' : C.textSec,
+                  border: `1px solid ${selectedCategoryId === chip.id ? C.orange : C.border}`,
+                  borderRadius: 20, padding: '5px 12px',
+                  fontSize: 11, fontWeight: 700, whiteSpace: 'nowrap' as const,
+                  cursor: 'pointer', flexShrink: 0,
+                }}
+              >{chip.label}</button>
+            ))}
+          </div>
+        )}
+
+        <div style={{ padding: '4px 18px 10px', fontSize: 11, color: C.textSec, fontWeight: 500, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <span>共 {foodDb.length} 項食物{search ? `，搜尋到 ${filtered.length} 項` : ''}</span>
+          <button onClick={() => setShowCategoryManager(true)} style={{
+            background: C.surfaceHigh, border: 'none', borderRadius: 8,
+            padding: '4px 10px', fontSize: 11, fontWeight: 700,
+            color: C.textSec, cursor: 'pointer',
+          }}>管理分類</button>
         </div>
 
         {filtered.length === 0 ? (
@@ -269,6 +346,7 @@ export function FoodDbTab({ foodDb, onAdd, onEdit, onDelete }: {
         <FoodFormSheet
           initial={editItem ?? undefined}
           title={editItem ? '編輯食物' : '新增食物'}
+          categories={categories}
           onSave={food => {
             if (editItem) onEdit(food)
             else onAdd(food)
@@ -276,6 +354,16 @@ export function FoodDbTab({ foodDb, onAdd, onEdit, onDelete }: {
             setEditItem(null)
           }}
           onClose={() => { setShowForm(false); setEditItem(null) }}
+        />
+      )}
+
+      {showCategoryManager && (
+        <CategoryManagerSheet
+          categories={categories}
+          onAdd={onAddCategory}
+          onRename={onRenameCategory}
+          onDelete={onDeleteCategory}
+          onClose={() => setShowCategoryManager(false)}
         />
       )}
     </div>
