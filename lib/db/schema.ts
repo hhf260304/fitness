@@ -28,6 +28,14 @@ export const exercises = pgTable('exercises', {
   rest:      integer('rest').notNull(),
 })
 
+export const foodCategories = pgTable('food_categories', {
+  id:     serial('id').primaryKey(),
+  userId: integer('user_id').references(() => users.id, { onDelete: 'cascade' }),
+  name:   text('name').notNull(),
+}, (t) => [
+  unique('food_categories_user_name_unique').on(t.userId, t.name),
+])
+
 export const foodCatalog = pgTable('food_catalog', {
   id:          serial('id').primaryKey(),
   userId:      integer('user_id').references(() => users.id, { onDelete: 'cascade' }),
@@ -37,7 +45,7 @@ export const foodCatalog = pgTable('food_catalog', {
   protein:     numeric('protein', { precision: 6, scale: 1 }).notNull(),
   fat:         numeric('fat',     { precision: 6, scale: 1 }).notNull(),
   carbs:       numeric('carbs',   { precision: 6, scale: 1 }).notNull(),
-  sugar:       numeric('sugar',   { precision: 6, scale: 1 }).notNull(),
+  categoryId:  integer('category_id').references(() => foodCategories.id, { onDelete: 'set null' }),
 }, (t) => [
   unique('food_catalog_user_name_unique').on(t.userId, t.name),
 ])
@@ -61,7 +69,6 @@ export const mealFoods = pgTable('meal_foods', {
   protein:       numeric('protein', { precision: 6, scale: 1 }).notNull(),
   fat:           numeric('fat',     { precision: 6, scale: 1 }).notNull(),
   carbs:         numeric('carbs',   { precision: 6, scale: 1 }).notNull(),
-  sugar:         numeric('sugar',   { precision: 6, scale: 1 }).notNull(),
 })
 
 export const goals = pgTable('goals', {
@@ -72,17 +79,17 @@ export const goals = pgTable('goals', {
   protein:  integer('protein').notNull(),
   fat:      integer('fat').notNull(),
   carbs:    integer('carbs').notNull(),
-  sugar:    integer('sugar').notNull(),
 }, (t) => [
   unique('goals_user_date_unique').on(t.userId, t.date),
 ])
 
 // ── Relations ─────────────────────────────────────────────────
 export const usersRelations = relations(users, ({ many }) => ({
-  sessions:    many(sessions),
-  meals:       many(meals),
-  goals:       many(goals),
-  foodCatalog: many(foodCatalog),
+  sessions:       many(sessions),
+  meals:          many(meals),
+  goals:          many(goals),
+  foodCatalog:    many(foodCatalog),
+  foodCategories: many(foodCategories),
 }))
 
 export const sessionsRelations = relations(sessions, ({ one, many }) => ({
@@ -108,5 +115,11 @@ export const goalsRelations = relations(goals, ({ one }) => ({
 }))
 
 export const foodCatalogRelations = relations(foodCatalog, ({ one }) => ({
-  user: one(users, { fields: [foodCatalog.userId], references: [users.id] }),
+  user:     one(users,          { fields: [foodCatalog.userId],     references: [users.id] }),
+  category: one(foodCategories, { fields: [foodCatalog.categoryId], references: [foodCategories.id] }),
+}))
+
+export const foodCategoriesRelations = relations(foodCategories, ({ one, many }) => ({
+  user:  one(users,       { fields: [foodCategories.userId], references: [users.id] }),
+  foods: many(foodCatalog),
 }))

@@ -64,6 +64,20 @@
       "when": 1779518603751,
       "tag": "0008_spicy_blazing_skull",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1748217600000,
+      "tag": "0009_remove_sugar",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1779687137291,
+      "tag": "0010_food_categories",
+      "breakpoints": true
     }
   ]
 }
