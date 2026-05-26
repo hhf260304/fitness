@@ -225,7 +225,7 @@ export function FitnessApp({ initialSessions, initialFoodDb, initialCategories, 
     await nutritionActions.reorderMeals(ids)
   }
   const saveGoals = async (g: Goals) => {
-    await nutritionActions.upsertGoals(TODAY, g)
+    await nutritionActions.upsertGoals(g)
     setUserGoals(g)
     setNutritionDay(prev => ({ ...prev, goals: g }))
   }

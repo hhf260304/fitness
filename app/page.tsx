@@ -13,7 +13,7 @@ export default async function Page() {
     getSessions(),
     getFoods(),
     getCategories(),
-    getGoals(TODAY),
+    getGoals(),
     getNutritionDay(TODAY),
   ])
 

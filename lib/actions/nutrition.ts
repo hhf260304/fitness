@@ -39,32 +39,26 @@ export async function getNutritionDay(date: string): Promise<NutritionDay> {
     with: { foods: true },
     orderBy: (t, { asc }) => [asc(t.sortOrder), asc(t.id)],
   })
-  const dayGoals = await getGoals(date)
+  const dayGoals = await getGoals()
   return {
     goals: dayGoals,
     meals: mealRows.map(r => toMeal(r, r.foods)),
   }
 }
 
-export async function getGoals(date: string): Promise<Goals> {
+export async function getGoals(): Promise<Goals> {
   const { userId } = await verifySession()
-  const [row] = await db.select().from(goals)
-    .where(and(eq(goals.userId, userId), eq(goals.date, date)))
+  const [row] = await db.select().from(goals).where(eq(goals.userId, userId))
   if (!row) return DEFAULT_GOALS
-  return {
-    calories: row.calories,
-    protein:  row.protein,
-    fat:      row.fat,
-    carbs:    row.carbs,
-  }
+  return { calories: row.calories, protein: row.protein, fat: row.fat, carbs: row.carbs }
 }
 
-export async function upsertGoals(date: string, data: Goals): Promise<void> {
+export async function upsertGoals(data: Goals): Promise<void> {
   const { userId } = await verifySession()
   await db.insert(goals)
-    .values({ date, userId, ...data })
+    .values({ userId, ...data })
     .onConflictDoUpdate({
-      target: [goals.userId, goals.date],
+      target: goals.userId,
       set:    { calories: data.calories, protein: data.protein, fat: data.fat, carbs: data.carbs },
     })
 }

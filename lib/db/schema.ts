@@ -73,15 +73,12 @@ export const mealFoods = pgTable('meal_foods', {
 
 export const goals = pgTable('goals', {
   id:       serial('id').primaryKey(),
-  userId:   integer('user_id').references(() => users.id, { onDelete: 'cascade' }),
-  date:     date('date').notNull(),
+  userId:   integer('user_id').references(() => users.id, { onDelete: 'cascade' }).unique(),
   calories: integer('calories').notNull(),
   protein:  integer('protein').notNull(),
   fat:      integer('fat').notNull(),
   carbs:    integer('carbs').notNull(),
-}, (t) => [
-  unique('goals_user_date_unique').on(t.userId, t.date),
-])
+})
 
 // ── Relations ─────────────────────────────────────────────────
 export const usersRelations = relations(users, ({ many }) => ({
