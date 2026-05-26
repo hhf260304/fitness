@@ -42,14 +42,15 @@ async function seed() {
   )
 
   console.log('Seeding nutrition...')
+  const firstDay = Object.values(DEFAULT_NUTRITION)[0]
+  await db.insert(goals).values({
+    calories: firstDay.goals.calories,
+    protein:  firstDay.goals.protein,
+    fat:      firstDay.goals.fat,
+    carbs:    firstDay.goals.carbs,
+  }).onConflictDoNothing()
+
   for (const [date, day] of Object.entries(DEFAULT_NUTRITION)) {
-    await db.insert(goals).values({
-      date,
-      calories: day.goals.calories,
-      protein:  day.goals.protein,
-      fat:      day.goals.fat,
-      carbs:    day.goals.carbs,
-    }).onConflictDoNothing()
 
     for (const meal of day.meals) {
       const [insertedMeal] = await db.insert(meals).values({
@@ -63,7 +64,7 @@ async function seed() {
           meal.foods.map(f => ({
             mealId:   insertedMeal.id,
             name:     f.name,
-            calories: f.calories,
+            calories: String(f.calories),
             protein:  String(f.protein),
             fat:      String(f.fat),
             carbs:    String(f.carbs),
