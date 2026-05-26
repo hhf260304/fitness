@@ -74,10 +74,8 @@ async function seed() {
     }
   }
 
-  // 插入預設目標（若今日尚無）
-  const TODAY = new Date().toISOString().slice(0, 10)
+  // 插入預設目標（若尚無全域目標）
   await db.insert(goals).values({
-    date:     TODAY,
     calories: DEFAULT_GOALS.calories,
     protein:  DEFAULT_GOALS.protein,
     fat:      DEFAULT_GOALS.fat,
