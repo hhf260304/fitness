@@ -78,7 +78,7 @@ export async function updateFood(id: number, data: Omit<Food, 'id'>): Promise<Fo
     await db.update(mealFoods)
       .set({
         name:     `${data.name} ${amt}g`,
-        calories: Math.round(data.calories * amt / servingSize),
+        calories: String(Math.round(data.calories * amt / servingSize)),
         protein:  String(Math.round(data.protein * amt / servingSize * 10) / 10),
         fat:      String(Math.round(data.fat      * amt / servingSize * 10) / 10),
         carbs:    String(Math.round(data.carbs    * amt / servingSize * 10) / 10),
