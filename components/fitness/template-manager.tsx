@@ -386,6 +386,7 @@ export function TemplateManagerModal({
 }) {
   const [editingTemplate, setEditingTemplate] = useState<MealTemplate | 'new' | null>(null)
   const [menuOpenId, setMenuOpenId]           = useState<number | null>(null)
+  const [menuPos, setMenuPos]                 = useState<{ top: number; right: number }>({ top: 0, right: 0 })
   const [saveDayMode, setSaveDayMode]         = useState(false)
   const [saveDayName, setSaveDayName]         = useState('')
   const [applying, setApplying]               = useState<number | null>(null)
@@ -533,7 +534,11 @@ export function TemplateManagerModal({
                       }}
                     >{applying === t.id ? '套用中…' : '套用'}</button>
                     <button
-                      onClick={() => setMenuOpenId(menuOpenId === t.id ? null : t.id)}
+                      onClick={e => {
+                        const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
+                        setMenuPos({ top: rect.bottom + 4, right: window.innerWidth - rect.right })
+                        setMenuOpenId(menuOpenId === t.id ? null : t.id)
+                      }}
                       style={{
                         background: C.surfaceHigh, border: 'none', borderRadius: 8,
                         padding: '5px 8px', fontSize: 14, color: C.textSec, cursor: 'pointer',
@@ -550,10 +555,10 @@ export function TemplateManagerModal({
                   <>
                     <div
                       onClick={() => setMenuOpenId(null)}
-                      style={{ position: 'fixed', inset: 0, zIndex: 1 }}
+                      style={{ position: 'fixed', inset: 0, zIndex: 110 }}
                     />
                     <div style={{
-                      position: 'absolute', top: 44, right: 14, zIndex: 2,
+                      position: 'fixed', top: menuPos.top, right: menuPos.right, zIndex: 111,
                       background: C.surfaceHigh, border: `1px solid ${C.border}`,
                       borderRadius: 12, padding: 6,
                       boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
