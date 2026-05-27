@@ -108,7 +108,9 @@ type Props = {
   initialTemplates:    MealTemplate[]
 }
 
-const TODAY = new Date().toISOString().slice(0, 10)
+// 取本地時區今日日期（toISOString 永遠回傳 UTC，在 JST 早上 9 點前會取到昨天）
+const _d = new Date()
+const TODAY = `${_d.getFullYear()}-${String(_d.getMonth() + 1).padStart(2, '0')}-${String(_d.getDate()).padStart(2, '0')}`
 
 // ── Main Client Component ─────────────────────────────────────
 export function FitnessApp({ initialSessions, initialFoodDb, initialCategories, initialGoals, initialNutritionDay, initialTemplates }: Props) {
@@ -223,18 +225,32 @@ export function FitnessApp({ initialSessions, initialFoodDb, initialCategories, 
   const handleOpenTemplates = () => setShowTemplates(true)
 
   const handleApplyTemplate = async (templateId: number) => {
-    const newMeals = await templateActions.applyTemplate(templateId, selectedDate)
-    setNutritionDay(prev => ({ ...prev, meals: newMeals }))
-    const t = templates.find(t => t.id === templateId)
-    if (t) setToastMessage(`已套用模版「${t.name}」`)
-    // 更新日曆快取，讓當日顯示「有記錄」點
-    const key = selectedDate.slice(0, 7)
-    setActiveDatesCache(prev => {
-      if (!prev.has(key)) return prev
-      const existing = prev.get(key)!
-      if (existing.includes(selectedDate)) return prev
-      return new Map(prev).set(key, [...existing, selectedDate])
-    })
+    const applyAndUpdate = async (force: boolean) => {
+      const newMeals = await templateActions.applyTemplate(templateId, selectedDate, force)
+      setNutritionDay(prev => ({ ...prev, meals: newMeals }))
+      const t = templates.find(t => t.id === templateId)
+      if (t) setToastMessage(`已套用模版「${t.name}」`)
+      // 更新日曆快取，讓當日顯示「有記錄」點
+      const key = selectedDate.slice(0, 7)
+      setActiveDatesCache(prev => {
+        if (!prev.has(key)) return prev
+        const existing = prev.get(key)!
+        if (existing.includes(selectedDate)) return prev
+        return new Map(prev).set(key, [...existing, selectedDate])
+      })
+    }
+
+    try {
+      await applyAndUpdate(false)
+    } catch (e: unknown) {
+      if (e instanceof Error && e.message === 'ALREADY_HAS_MEALS') {
+        const ok = window.confirm('此日期已有餐點記錄，確定要以模版覆蓋嗎？')
+        if (!ok) return
+        await applyAndUpdate(true)
+      } else {
+        throw e
+      }
+    }
   }
 
   const handleSaveDayAsTemplate = async (name: string) => {
