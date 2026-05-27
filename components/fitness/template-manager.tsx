@@ -253,109 +253,115 @@ export function TemplateEditorModal({ template, foodDb, onSave, onClose }: {
   const totalCal = localMeals.reduce((s, m) => s + m.foods.reduce((fs, f) => fs + f.calories, 0), 0)
 
   return (
-    <div style={{
-      position: 'fixed', inset: 0, zIndex: 110,
-      background: C.bg, display: 'flex', flexDirection: 'column',
-    }}>
-      {/* Header */}
+    <div style={{ position: 'fixed', inset: 0, zIndex: 110, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
+      <div onClick={onClose} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.72)' }} />
       <div style={{
-        display: 'flex', alignItems: 'center', gap: 12,
-        padding: '14px 16px', borderBottom: `1px solid ${C.border}`,
-        flexShrink: 0,
+        position: 'relative', background: C.surfaceHigh, borderRadius: 20,
+        width: '100%', maxWidth: 430, maxHeight: '85dvh',
+        display: 'flex', flexDirection: 'column',
+        boxShadow: '0 24px 48px rgba(0,0,0,0.5)',
       }}>
-        <button
-          onClick={onClose}
-          style={{
-            background: C.surfaceHigh, border: 'none', borderRadius: 8,
-            padding: '6px 10px', cursor: 'pointer', color: C.textSec, fontSize: 16,
-          }}
-        >←</button>
-        <div style={{ flex: 1, fontSize: 16, fontWeight: 800, color: C.text }}>
-          {template ? '編輯模版' : '新增模版'}
+        {/* Header */}
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 12,
+          padding: '14px 16px', borderBottom: `1px solid ${C.border}`,
+          flexShrink: 0,
+        }}>
+          <button
+            onClick={onClose}
+            style={{
+              background: C.border, border: 'none', borderRadius: 8,
+              padding: '6px 10px', cursor: 'pointer', color: C.textSec, fontSize: 16,
+            }}
+          >←</button>
+          <div style={{ flex: 1, fontSize: 16, fontWeight: 800, color: C.text }}>
+            {template ? '編輯模版' : '新增模版'}
+          </div>
+          <button
+            onClick={handleSave}
+            disabled={!valid || saving}
+            style={{
+              background: valid && !saving ? C.orange : C.border,
+              color: valid && !saving ? '#fff' : C.textSec,
+              border: 'none', borderRadius: 10,
+              padding: '8px 18px', fontSize: 13, fontWeight: 800, cursor: valid ? 'pointer' : 'not-allowed',
+            }}
+          >{saving ? '儲存中…' : '儲存'}</button>
         </div>
-        <button
-          onClick={handleSave}
-          disabled={!valid || saving}
-          style={{
-            background: valid && !saving ? C.orange : C.border,
-            color: valid && !saving ? '#fff' : C.textSec,
-            border: 'none', borderRadius: 10,
-            padding: '8px 18px', fontSize: 13, fontWeight: 800, cursor: valid ? 'pointer' : 'not-allowed',
-          }}
-        >{saving ? '儲存中…' : '儲存'}</button>
-      </div>
 
-      {/* 模版名稱 */}
-      <div style={{ padding: '14px 16px 10px', flexShrink: 0 }}>
-        <label style={{ fontSize: 11, color: C.textSec, fontWeight: 700, letterSpacing: '0.5px', display: 'block', marginBottom: 6 }}>
-          模版名稱
-        </label>
-        <input
-          value={name}
-          onChange={e => setName(e.target.value)}
-          placeholder="例：減脂日、增肌日…"
-          autoFocus
-          style={{
-            width: '100%', background: C.surface, border: `1px solid ${C.border}`,
-            borderRadius: 10, padding: '11px 14px', color: C.text, fontSize: 14,
-            outline: 'none', boxSizing: 'border-box' as const,
-          }}
-        />
-      </div>
-
-      {/* 餐點清單 */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '0 16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
-        {localMeals.map(meal => (
-          <TemplateMealCard
-            key={meal.localId}
-            meal={meal}
-            foodDb={foodDb}
-            onChange={updated => setLocalMeals(prev => prev.map(m => m.localId === meal.localId ? updated : m))}
-            onDelete={() => setLocalMeals(prev => prev.filter(m => m.localId !== meal.localId))}
+        {/* 模版名稱 */}
+        <div style={{ padding: '14px 16px 10px', flexShrink: 0 }}>
+          <label style={{ fontSize: 11, color: C.textSec, fontWeight: 700, letterSpacing: '0.5px', display: 'block', marginBottom: 6 }}>
+            模版名稱
+          </label>
+          <input
+            value={name}
+            onChange={e => setName(e.target.value)}
+            placeholder="例：減脂日、增肌日…"
+            autoFocus
+            style={{
+              width: '100%', background: C.surface, border: `1px solid ${C.border}`,
+              borderRadius: 10, padding: '11px 14px', color: C.text, fontSize: 14,
+              outline: 'none', boxSizing: 'border-box' as const,
+            }}
           />
-        ))}
+        </div>
 
-        <button
-          onClick={() => setShowAddMeal(true)}
-          style={{
-            background: C.orange + '10', border: `1.5px dashed ${C.orange}50`,
-            borderRadius: 14, padding: '13px',
-            color: C.orange, fontSize: 13, fontWeight: 700, cursor: 'pointer',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-          }}
-        >
-          <span style={{ fontSize: 16, lineHeight: 1 }}>+</span> 新增一餐
-        </button>
-        <div style={{ height: 16 }} />
+        {/* 餐點清單 */}
+        <div style={{ flex: 1, overflowY: 'auto', padding: '0 16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {localMeals.map(meal => (
+            <TemplateMealCard
+              key={meal.localId}
+              meal={meal}
+              foodDb={foodDb}
+              onChange={updated => setLocalMeals(prev => prev.map(m => m.localId === meal.localId ? updated : m))}
+              onDelete={() => setLocalMeals(prev => prev.filter(m => m.localId !== meal.localId))}
+            />
+          ))}
+
+          <button
+            onClick={() => setShowAddMeal(true)}
+            style={{
+              background: C.orange + '10', border: `1.5px dashed ${C.orange}50`,
+              borderRadius: 14, padding: '13px',
+              color: C.orange, fontSize: 13, fontWeight: 700, cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+            }}
+          >
+            <span style={{ fontSize: 16, lineHeight: 1 }}>+</span> 新增一餐
+          </button>
+          <div style={{ height: 16 }} />
+        </div>
+
+        {/* 底部摘要 */}
+        <div style={{
+          padding: '10px 16px', borderTop: `1px solid ${C.border}`,
+          borderRadius: '0 0 20px 20px',
+          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+          flexShrink: 0,
+        }}>
+          <span style={{ fontSize: 12, color: C.textSec }}>共 {localMeals.length} 餐</span>
+          <span style={{ fontSize: 14, fontWeight: 800, color: C.orange }}>{fmt(totalCal)} kcal</span>
+        </div>
+
+        {showAddMeal && (
+          <MealModal
+            onSave={(mealName, mealTime) => {
+              const lm: LocalMeal = {
+                localId:   Date.now(),
+                id:        0,
+                name:      mealName,
+                time:      mealTime,
+                sortOrder: localMeals.length,
+                foods:     [],
+              }
+              setLocalMeals(prev => [...prev, lm])
+              setShowAddMeal(false)
+            }}
+            onClose={() => setShowAddMeal(false)}
+          />
+        )}
       </div>
-
-      {/* 底部摘要 */}
-      <div style={{
-        padding: '10px 16px', borderTop: `1px solid ${C.border}`,
-        background: C.bg, display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-        flexShrink: 0,
-      }}>
-        <span style={{ fontSize: 12, color: C.textSec }}>共 {localMeals.length} 餐</span>
-        <span style={{ fontSize: 14, fontWeight: 800, color: C.orange }}>{fmt(totalCal)} kcal</span>
-      </div>
-
-      {showAddMeal && (
-        <MealModal
-          onSave={(mealName, mealTime) => {
-            const lm: LocalMeal = {
-              localId:   Date.now(),
-              id:        0,
-              name:      mealName,
-              time:      mealTime,
-              sortOrder: localMeals.length,
-              foods:     [],
-            }
-            setLocalMeals(prev => [...prev, lm])
-            setShowAddMeal(false)
-          }}
-          onClose={() => setShowAddMeal(false)}
-        />
-      )}
     </div>
   )
 }
