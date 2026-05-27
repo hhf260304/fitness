@@ -1,4 +1,4 @@
-import { pgTable, serial, text, integer, numeric, date, time, timestamp, unique } from 'drizzle-orm/pg-core'
+import { pgTable, serial, text, integer, numeric, date, time, timestamp, unique, boolean } from 'drizzle-orm/pg-core'
 import { relations } from 'drizzle-orm'
 
 export const users = pgTable('users', {
@@ -80,6 +80,33 @@ export const goals = pgTable('goals', {
   carbs:    integer('carbs').notNull(),
 })
 
+export const mealTemplates = pgTable('meal_templates', {
+  id:        serial('id').primaryKey(),
+  userId:    integer('user_id').references(() => users.id, { onDelete: 'cascade' }),
+  name:      text('name').notNull(),
+  isDefault: boolean('is_default').notNull().default(false),
+})
+
+export const mealTemplateMeals = pgTable('meal_template_meals', {
+  id:         serial('id').primaryKey(),
+  templateId: integer('template_id').notNull().references(() => mealTemplates.id, { onDelete: 'cascade' }),
+  name:       text('name').notNull(),
+  time:       time('time'),
+  sortOrder:  integer('sort_order').notNull().default(0),
+})
+
+export const mealTemplateFoods = pgTable('meal_template_foods', {
+  id:             serial('id').primaryKey(),
+  templateMealId: integer('template_meal_id').notNull().references(() => mealTemplateMeals.id, { onDelete: 'cascade' }),
+  catalogFoodId:  integer('catalog_food_id').references(() => foodCatalog.id, { onDelete: 'set null' }),
+  amountG:        numeric('amount_g', { precision: 8, scale: 1 }),
+  name:           text('name').notNull(),
+  calories:       numeric('calories', { precision: 7, scale: 1 }).notNull(),
+  protein:        numeric('protein',  { precision: 6, scale: 1 }).notNull(),
+  fat:            numeric('fat',      { precision: 6, scale: 1 }).notNull(),
+  carbs:          numeric('carbs',    { precision: 6, scale: 1 }).notNull(),
+})
+
 // ── Relations ─────────────────────────────────────────────────
 export const usersRelations = relations(users, ({ many }) => ({
   sessions:       many(sessions),
@@ -87,6 +114,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   goals:          many(goals),
   foodCatalog:    many(foodCatalog),
   foodCategories: many(foodCategories),
+  mealTemplates:  many(mealTemplates),
 }))
 
 export const sessionsRelations = relations(sessions, ({ one, many }) => ({
@@ -119,4 +147,18 @@ export const foodCatalogRelations = relations(foodCatalog, ({ one }) => ({
 export const foodCategoriesRelations = relations(foodCategories, ({ one, many }) => ({
   user:  one(users,       { fields: [foodCategories.userId], references: [users.id] }),
   foods: many(foodCatalog),
+}))
+
+export const mealTemplatesRelations = relations(mealTemplates, ({ one, many }) => ({
+  user:  one(users, { fields: [mealTemplates.userId], references: [users.id] }),
+  meals: many(mealTemplateMeals),
+}))
+
+export const mealTemplateMealsRelations = relations(mealTemplateMeals, ({ one, many }) => ({
+  template: one(mealTemplates, { fields: [mealTemplateMeals.templateId], references: [mealTemplates.id] }),
+  foods:    many(mealTemplateFoods),
+}))
+
+export const mealTemplateFoodsRelations = relations(mealTemplateFoods, ({ one }) => ({
+  templateMeal: one(mealTemplateMeals, { fields: [mealTemplateFoods.templateMealId], references: [mealTemplateMeals.id] }),
 }))
