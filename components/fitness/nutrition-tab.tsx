@@ -269,7 +269,7 @@ function EditFoodModal({ food, foodDb, onSave, onClose }: {
                 ['fat',      '脂肪 g',    MACRO_COLORS.fat],
                 ['carbs',    '碳水 g',    MACRO_COLORS.carbs],
               ] as const).map(([field, label, color]) => (
-                <div key={field} style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+                <div key={field} style={{ display: 'flex', flexDirection: 'column', gap: 5, ...(field === 'calories' ? { gridColumn: '1 / -1' } : {}) }}>
                   <label style={{ fontSize: 10, color, fontWeight: 700, letterSpacing: '0.4px', textTransform: 'uppercase' as const }}>{label}</label>
                   <input
                     type="number" step="any" value={form[field]}
@@ -528,7 +528,9 @@ function AddFoodModal({ onAdd, onClose, foodDb }: {
               />
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 16 }}>
-              {numInp('calories', '熱量 kcal', C.orange)}
+              <div style={{ gridColumn: '1 / -1' }}>
+                {numInp('calories', '熱量 kcal', C.orange)}
+              </div>
               {numInp('protein',  '蛋白質 g',  MACRO_COLORS.protein)}
               {numInp('fat',      '脂肪 g',    MACRO_COLORS.fat)}
               {numInp('carbs',    '碳水 g',    MACRO_COLORS.carbs)}
@@ -827,7 +829,7 @@ function SortableMealSection({ meal, onUpdate, onDelete, foodDb }: {
 }
 
 // ── NutritionTab ──────────────────────────────────────────────
-export function NutritionTab({ nutritionDay, onUpdateMeal, onAddMeal, onDeleteMeal, onReorderMeals, foodDb, goals }: {
+export function NutritionTab({ nutritionDay, onUpdateMeal, onAddMeal, onDeleteMeal, onReorderMeals, foodDb, goals, loading }: {
   nutritionDay: NutritionDay | undefined
   onUpdateMeal: (id: number, updated: Meal) => void
   onAddMeal: (meal: Meal) => void
@@ -835,6 +837,7 @@ export function NutritionTab({ nutritionDay, onUpdateMeal, onAddMeal, onDeleteMe
   onReorderMeals: (ids: number[]) => void
   foodDb: Food[]
   goals: Goals
+  loading?: boolean
 }) {
   const [showAddMeal, setShowAddMeal] = useState(false)
   const meals  = nutritionDay?.meals || []
@@ -860,7 +863,22 @@ export function NutritionTab({ nutritionDay, onUpdateMeal, onAddMeal, onDeleteMe
   }
 
   return (
-    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden', position: 'relative' }}>
+      {loading && (
+        <div style={{
+          position: 'absolute', inset: 0, zIndex: 10,
+          background: C.bg + 'cc',
+          display: 'flex', flexDirection: 'column', gap: 12, padding: '16px',
+        }}>
+          {[180, 140, 160].map((h, i) => (
+            <div key={i} style={{
+              height: h, borderRadius: 16,
+              background: C.surfaceHigh,
+              animation: 'pulse 1.2s ease-in-out infinite',
+            }} />
+          ))}
+        </div>
+      )}
       <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden' }}>
         <MacroSummary totals={totals} goals={goals} />
 
