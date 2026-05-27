@@ -12,6 +12,7 @@ import { NutritionTab } from '@/components/fitness/nutrition-tab'
 import { FoodDbTab }    from '@/components/fitness/food-db-tab'
 import { SettingsTab }  from '@/components/fitness/settings-tab'
 import { BottomTabBar } from '@/components/fitness/bottom-tab-bar'
+import { NutritionHeader } from '@/components/fitness/nutrition-header'
 
 // ── Tab headers（從 page.tsx 搬入，原封不動）─────────────────
 function WorkoutHeader({ count }: { count: number }) {
@@ -42,37 +43,6 @@ function WorkoutHeader({ count }: { count: number }) {
   )
 }
 
-function NutritionHeader() {
-  const d    = new Date()
-  const days = ['日','一','二','三','四','五','六']
-  const label = `${d.getMonth() + 1}月${d.getDate()}日 週${days[d.getDay()]}`
-  return (
-    <div style={{
-      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-      padding: '10px 18px', borderBottom: `1px solid ${C.border}`,
-      background: C.bg, flexShrink: 0,
-    }}>
-      <div>
-        <div style={{ fontSize: 20, fontWeight: 900, color: C.text, letterSpacing: '-0.5px' }}>飲食紀錄</div>
-        <div style={{ fontSize: 11, color: C.textSec, marginTop: 1, fontWeight: 500 }}>{label}</div>
-      </div>
-      <div style={{
-        width: 36, height: 36, borderRadius: 10,
-        background: C.orange + '20', border: `1px solid ${C.orange}40`,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-      }}>
-        <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
-          <circle cx="10" cy="10" r="8"  stroke={C.orange} strokeWidth="1.6"/>
-          <circle cx="10" cy="10" r="5"  stroke={C.orange} strokeWidth="1.2"/>
-          <line x1="10" y1="2"    x2="10" y2="4.5"  stroke={C.orange} strokeWidth="1.6" strokeLinecap="round"/>
-          <line x1="10" y1="15.5" x2="10" y2="18"   stroke={C.orange} strokeWidth="1.6" strokeLinecap="round"/>
-          <line x1="2"  y1="10"   x2="4.5" y2="10"  stroke={C.orange} strokeWidth="1.6" strokeLinecap="round"/>
-          <line x1="15.5" y1="10" x2="18" y2="10"   stroke={C.orange} strokeWidth="1.6" strokeLinecap="round"/>
-        </svg>
-      </div>
-    </div>
-  )
-}
 
 function FoodDbHeader({ count }: { count: number }) {
   return (
@@ -145,6 +115,11 @@ export function FitnessApp({ initialSessions, initialFoodDb, initialCategories, 
   const [categories, setCategories] = useState<FoodCategory[]>(initialCategories)
   const [userGoals, setUserGoals] = useState<Goals>(initialGoals)
   const [nutritionDay, setNutritionDay] = useState<NutritionDay>(initialNutritionDay)
+  const [selectedDate,      setSelectedDate]      = useState(TODAY)
+  const [calendarOpen,      setCalendarOpen]      = useState(false)
+  const [calendarViewMonth, setCalendarViewMonth] = useState(TODAY.slice(0, 7))
+  const [activeDatesCache,  setActiveDatesCache]  = useState<Map<string, string[]>>(new Map())
+  const [nutritionLoading,  setNutritionLoading]  = useState(false)
 
   // ── Session CRUD ──────────────────────────────────────────
   const updateSession = async (id: number, updated: Session) => {
@@ -203,11 +178,19 @@ export function FitnessApp({ initialSessions, initialFoodDb, initialCategories, 
     }))
   }
   const addMeal = async (meal: Meal) => {
-    const created = await nutritionActions.createMeal(TODAY, meal)
+    const created = await nutritionActions.createMeal(selectedDate, meal)
     setNutritionDay(prev => ({
       ...prev,
       meals: [...prev.meals, created],
     }))
+    // 若當月已快取且今日尚未在其中，加入
+    const key = selectedDate.slice(0, 7)
+    setActiveDatesCache(prev => {
+      if (!prev.has(key)) return prev
+      const existing = prev.get(key)!
+      if (existing.includes(selectedDate)) return prev
+      return new Map(prev).set(key, [...existing, selectedDate])
+    })
   }
   const deleteMeal = async (id: number) => {
     await nutritionActions.deleteMeal(id)
@@ -230,6 +213,42 @@ export function FitnessApp({ initialSessions, initialFoodDb, initialCategories, 
     setNutritionDay(prev => ({ ...prev, goals: g }))
   }
 
+  const handleOpenCalendar = async () => {
+    const key = calendarViewMonth
+    setCalendarOpen(true)
+    if (!activeDatesCache.has(key)) {
+      const [y, m] = key.split('-').map(Number)
+      const dates = await nutritionActions.getActiveDates(y, m)
+      setActiveDatesCache(prev => new Map(prev).set(key, dates))
+    }
+  }
+
+  const handleToggleCalendar = () => {
+    if (calendarOpen) {
+      setCalendarOpen(false)
+    } else {
+      handleOpenCalendar()
+    }
+  }
+
+  const handleChangeMonth = async (year: number, month: number) => {
+    const key = `${year}-${String(month).padStart(2, '0')}`
+    setCalendarViewMonth(key)
+    if (!activeDatesCache.has(key)) {
+      const dates = await nutritionActions.getActiveDates(year, month)
+      setActiveDatesCache(prev => new Map(prev).set(key, dates))
+    }
+  }
+
+  const handleSelectDate = async (date: string) => {
+    setCalendarOpen(false)
+    setSelectedDate(date)
+    setNutritionLoading(true)
+    const day = await nutritionActions.getNutritionDay(date)
+    setNutritionDay(day)
+    setNutritionLoading(false)
+  }
+
   return (
     <div style={{
       display: 'flex', justifyContent: 'center', alignItems: 'stretch',
@@ -243,7 +262,17 @@ export function FitnessApp({ initialSessions, initialFoodDb, initialCategories, 
         paddingTop: 'env(safe-area-inset-top)',
       }}>
         {tab === 'workout'   && <WorkoutHeader   count={sessions.length} />}
-        {tab === 'nutrition' && <NutritionHeader />}
+        {tab === 'nutrition' && (
+          <NutritionHeader
+            selectedDate={selectedDate}
+            calendarOpen={calendarOpen}
+            calendarViewMonth={calendarViewMonth}
+            activeDates={activeDatesCache.get(calendarViewMonth) ?? []}
+            onToggleCalendar={handleToggleCalendar}
+            onSelectDate={handleSelectDate}
+            onChangeMonth={handleChangeMonth}
+          />
+        )}
         {tab === 'fooddb'    && <FoodDbHeader    count={foodDb.length} />}
         {tab === 'settings'  && <SettingsHeader />}
 
@@ -266,6 +295,7 @@ export function FitnessApp({ initialSessions, initialFoodDb, initialCategories, 
               onReorderMeals={reorderMeals}
               foodDb={foodDb}
               goals={userGoals}
+              loading={nutritionLoading}
             />
           )}
           {tab === 'fooddb' && (
