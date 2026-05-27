@@ -86,7 +86,7 @@ export function NutritionHeader({
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             cursor: 'pointer', transition: 'background 0.15s',
           }}
-          aria-label="開啟日曆"
+          aria-label={calendarOpen ? '關閉日曆' : '開啟日曆'}
         >
           <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
             <rect x="2" y="4" width="16" height="14" rx="2" stroke={C.orange} strokeWidth="1.6"/>
@@ -108,6 +108,7 @@ export function NutritionHeader({
             <button
               type="button"
               onClick={prevMonth}
+              aria-label="上個月"
               style={{
                 width: 28, height: 28, borderRadius: 7, border: `1px solid ${C.border}`,
                 background: C.surface, cursor: 'pointer',
@@ -127,6 +128,7 @@ export function NutritionHeader({
               type="button"
               onClick={nextMonth}
               disabled={isNextDisabled}
+              aria-label="下個月"
               style={{
                 width: 28, height: 28, borderRadius: 7, border: `1px solid ${C.border}`,
                 background: C.surface, cursor: isNextDisabled ? 'not-allowed' : 'pointer',
