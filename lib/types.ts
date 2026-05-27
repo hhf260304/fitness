@@ -57,3 +57,29 @@ export type FoodCategory = {
   id: number
   name: string
 }
+
+export type MealTemplateFood = {
+  id: number
+  catalogFoodId?: number
+  amountG?: number
+  name: string
+  calories: number
+  protein: number
+  fat: number
+  carbs: number
+}
+
+export type MealTemplateMeal = {
+  id: number
+  name: string
+  time: string      // '—' 表示無時間
+  sortOrder: number
+  foods: MealTemplateFood[]
+}
+
+export type MealTemplate = {
+  id: number
+  name: string
+  isDefault: boolean
+  meals: MealTemplateMeal[]
+}
