@@ -415,14 +415,14 @@ export function TemplateManagerModal({
   }
 
   return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 100, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
+    <div style={{ position: 'fixed', inset: 0, zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 12px' }}>
       <div onClick={onClose} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.72)' }} />
       <div style={{
         position: 'relative', background: C.surfaceHigh,
-        borderRadius: '20px 20px 0 0', padding: '20px 20px 32px',
+        borderRadius: 20, padding: '20px 20px 24px',
         width: '100%', maxWidth: 430, maxHeight: '85dvh',
         display: 'flex', flexDirection: 'column',
-        boxShadow: '0 -8px 32px rgba(0,0,0,0.4)',
+        boxShadow: '0 24px 48px rgba(0,0,0,0.5)',
       }}>
         {/* 標題 */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, flexShrink: 0 }}>
