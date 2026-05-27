@@ -227,6 +227,14 @@ export function FitnessApp({ initialSessions, initialFoodDb, initialCategories, 
     setNutritionDay(prev => ({ ...prev, meals: newMeals }))
     const t = templates.find(t => t.id === templateId)
     if (t) setToastMessage(`已套用模版「${t.name}」`)
+    // 更新日曆快取，讓當日顯示「有記錄」點
+    const key = selectedDate.slice(0, 7)
+    setActiveDatesCache(prev => {
+      if (!prev.has(key)) return prev
+      const existing = prev.get(key)!
+      if (existing.includes(selectedDate)) return prev
+      return new Map(prev).set(key, [...existing, selectedDate])
+    })
   }
 
   const handleSaveDayAsTemplate = async (name: string) => {
@@ -294,6 +302,14 @@ export function FitnessApp({ initialSessions, initialFoodDb, initialCategories, 
             const newMeals = await templateActions.applyTemplate(defaultTemplate.id, date)
             setNutritionDay({ ...day, meals: newMeals })
             setToastMessage(`已套用預設模版「${defaultTemplate.name}」`)
+            // 更新日曆快取，讓切換後的日期顯示「有記錄」點
+            const key = date.slice(0, 7)
+            setActiveDatesCache(prev => {
+              if (!prev.has(key)) return prev
+              const existing = prev.get(key)!
+              if (existing.includes(date)) return prev
+              return new Map(prev).set(key, [...existing, date])
+            })
           } catch {
             // ALREADY_HAS_MEALS 或其他錯誤，靜默顯示空白天
             setNutritionDay(day)
@@ -383,7 +399,6 @@ export function FitnessApp({ initialSessions, initialFoodDb, initialCategories, 
           <TemplateManagerModal
             templates={templates}
             foodDb={foodDb}
-            selectedDate={selectedDate}
             onApply={handleApplyTemplate}
             onSaveDayAsTemplate={handleSaveDayAsTemplate}
             onCreate={handleCreateTemplate}

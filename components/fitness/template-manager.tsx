@@ -363,14 +363,13 @@ export function TemplateEditorModal({ template, foodDb, onSave, onClose }: {
 // ── TemplateManagerModal ──────────────────────────────────────
 
 export function TemplateManagerModal({
-  templates, foodDb, selectedDate,
+  templates, foodDb,
   onApply, onSaveDayAsTemplate,
   onCreate, onUpdate, onDelete, onSetDefault,
   onClose,
 }: {
   templates:           MealTemplate[]
   foodDb:              Food[]
-  selectedDate:        string
   onApply:             (id: number) => Promise<void>
   onSaveDayAsTemplate: (name: string) => Promise<void>
   onCreate:            (name: string, meals: Omit<MealTemplateMeal, 'id'>[]) => Promise<void>
