@@ -32,3 +32,5 @@ ALTER TABLE "meal_template_meals" ADD CONSTRAINT "meal_template_meals_template_i
 ALTER TABLE "meal_template_foods" ADD CONSTRAINT "meal_template_foods_template_meal_id_meal_template_meals_id_fk" FOREIGN KEY ("template_meal_id") REFERENCES "public"."meal_template_meals"("id") ON DELETE cascade ON UPDATE no action;
 --> statement-breakpoint
 ALTER TABLE "meal_template_foods" ADD CONSTRAINT "meal_template_foods_catalog_food_id_food_catalog_id_fk" FOREIGN KEY ("catalog_food_id") REFERENCES "public"."food_catalog"("id") ON DELETE set null ON UPDATE no action;
+--> statement-breakpoint
+CREATE UNIQUE INDEX "meal_templates_user_default_unique" ON "meal_templates" ("user_id") WHERE "is_default" = true;

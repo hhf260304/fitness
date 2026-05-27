@@ -1,5 +1,5 @@
-import { pgTable, serial, text, integer, numeric, date, time, timestamp, unique, boolean } from 'drizzle-orm/pg-core'
-import { relations } from 'drizzle-orm'
+import { pgTable, serial, text, integer, numeric, date, time, timestamp, unique, boolean, uniqueIndex } from 'drizzle-orm/pg-core'
+import { relations, sql } from 'drizzle-orm'
 
 export const users = pgTable('users', {
   id:             serial('id').primaryKey(),
@@ -85,7 +85,9 @@ export const mealTemplates = pgTable('meal_templates', {
   userId:    integer('user_id').references(() => users.id, { onDelete: 'cascade' }),
   name:      text('name').notNull(),
   isDefault: boolean('is_default').notNull().default(false),
-})
+}, (t) => [
+  uniqueIndex('meal_templates_user_default_unique').on(t.userId).where(sql`${t.isDefault} = true`),
+])
 
 export const mealTemplateMeals = pgTable('meal_template_meals', {
   id:         serial('id').primaryKey(),
