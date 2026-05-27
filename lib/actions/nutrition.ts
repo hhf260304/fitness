@@ -136,7 +136,8 @@ export async function reorderMeals(ids: number[]): Promise<void> {
 export async function getActiveDates(year: number, month: number): Promise<string[]> {
   const { userId } = await verifySession()
   const start = `${year}-${String(month).padStart(2, '0')}-01`
-  const end   = new Date(year, month, 0).toISOString().slice(0, 10)
+  const lastDay = new Date(year, month, 0).getDate()
+  const end     = `${year}-${String(month).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`
   const rows  = await db
     .selectDistinct({ date: meals.date })
     .from(meals)
