@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import type { TabId, Session, Food, Goals, NutritionDay, Meal, FoodCategory, MealTemplate, MealTemplateMeal } from '@/lib/types'
 import { C } from '@/lib/fitness-constants'
 import * as sessionActions   from '@/lib/actions/sessions'
@@ -128,6 +128,34 @@ export function FitnessApp({ initialSessions, initialFoodDb, initialCategories, 
   const [templates,     setTemplates]     = useState<MealTemplate[]>(initialTemplates)
   const [showTemplates, setShowTemplates] = useState(false)
   const [toastMessage,  setToastMessage]  = useState<string | null>(null)
+
+  // ── 初始載入：若今日無餐點則套用預設模版 ────────────────────────
+  useEffect(() => {
+    // 只在今日（initialNutritionDay）完全空白時觸發
+    if (initialNutritionDay.meals.length > 0) return
+    const defaultTemplate = initialTemplates.find(t => t.isDefault)
+    if (!defaultTemplate) return
+
+    setNutritionLoading(true)
+    templateActions.applyTemplate(defaultTemplate.id, TODAY)
+      .then(newMeals => {
+        setNutritionDay(prev => ({ ...prev, meals: newMeals }))
+        setToastMessage(`已套用預設模版「${defaultTemplate.name}」`)
+        // 更新日曆快取，讓今日顯示「有記錄」點
+        const key = TODAY.slice(0, 7)
+        setActiveDatesCache(prev => {
+          if (!prev.has(key)) return prev
+          const existing = prev.get(key)!
+          if (existing.includes(TODAY)) return prev
+          return new Map(prev).set(key, [...existing, TODAY])
+        })
+      })
+      .catch(() => {
+        // 靜默忽略（例如 ALREADY_HAS_MEALS 或其他錯誤）
+      })
+      .finally(() => setNutritionLoading(false))
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []) // 僅 mount 時執行一次，intentionally 不列依賴
 
   // ── Session CRUD ──────────────────────────────────────────
   const updateSession = async (id: number, updated: Session) => {
