@@ -244,9 +244,12 @@ export function FitnessApp({ initialSessions, initialFoodDb, initialCategories, 
     setCalendarOpen(false)
     setSelectedDate(date)
     setNutritionLoading(true)
-    const day = await nutritionActions.getNutritionDay(date)
-    setNutritionDay(day)
-    setNutritionLoading(false)
+    try {
+      const day = await nutritionActions.getNutritionDay(date)
+      setNutritionDay(day)
+    } finally {
+      setNutritionLoading(false)
+    }
   }
 
   return (
