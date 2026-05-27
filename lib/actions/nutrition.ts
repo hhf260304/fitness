@@ -2,7 +2,7 @@
 
 import { db } from '@/lib/db'
 import { meals, mealFoods, goals } from '@/lib/db/schema'
-import { eq, and, asc } from 'drizzle-orm'
+import { eq, and, asc, gte, lte } from 'drizzle-orm'
 import type { Meal, Food, Goals, NutritionDay } from '@/lib/types'
 import { DEFAULT_GOALS } from '@/lib/data'
 import { verifySession } from '@/lib/session'
@@ -131,4 +131,15 @@ export async function reorderMeals(ids: number[]): Promise<void> {
         .where(and(eq(meals.id, id), eq(meals.userId, userId)))
     )
   )
+}
+
+export async function getActiveDates(year: number, month: number): Promise<string[]> {
+  const { userId } = await verifySession()
+  const start = `${year}-${String(month).padStart(2, '0')}-01`
+  const end   = new Date(year, month, 0).toISOString().slice(0, 10)
+  const rows  = await db
+    .selectDistinct({ date: meals.date })
+    .from(meals)
+    .where(and(eq(meals.userId, userId), gte(meals.date, start), lte(meals.date, end)))
+  return rows.map(r => r.date)
 }
