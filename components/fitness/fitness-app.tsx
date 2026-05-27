@@ -1,18 +1,20 @@
 'use client'
 
 import { useState } from 'react'
-import type { TabId, Session, Food, Goals, NutritionDay, Meal, FoodCategory } from '@/lib/types'
+import type { TabId, Session, Food, Goals, NutritionDay, Meal, FoodCategory, MealTemplate, MealTemplateMeal } from '@/lib/types'
 import { C } from '@/lib/fitness-constants'
 import * as sessionActions   from '@/lib/actions/sessions'
 import * as nutritionActions from '@/lib/actions/nutrition'
 import * as foodActions      from '@/lib/actions/food-catalog'
 import * as categoryActions  from '@/lib/actions/food-categories'
+import * as templateActions  from '@/lib/actions/meal-templates'
 import { WorkoutTab }   from '@/components/fitness/workout-tab'
 import { NutritionTab } from '@/components/fitness/nutrition-tab'
 import { FoodDbTab }    from '@/components/fitness/food-db-tab'
 import { SettingsTab }  from '@/components/fitness/settings-tab'
 import { BottomTabBar } from '@/components/fitness/bottom-tab-bar'
 import { NutritionHeader } from '@/components/fitness/nutrition-header'
+import { TemplateManagerModal, TemplateAppliedToast } from '@/components/fitness/template-manager'
 
 // ── Tab headers（從 page.tsx 搬入，原封不動）─────────────────
 function WorkoutHeader({ count }: { count: number }) {
@@ -103,12 +105,13 @@ type Props = {
   initialCategories:   FoodCategory[]
   initialGoals:        Goals
   initialNutritionDay: NutritionDay
+  initialTemplates:    MealTemplate[]
 }
 
 const TODAY = new Date().toISOString().slice(0, 10)
 
 // ── Main Client Component ─────────────────────────────────────
-export function FitnessApp({ initialSessions, initialFoodDb, initialCategories, initialGoals, initialNutritionDay }: Props) {
+export function FitnessApp({ initialSessions, initialFoodDb, initialCategories, initialGoals, initialNutritionDay, initialTemplates }: Props) {
   const [tab, setTab]           = useState<TabId>('workout')
   const [sessions, setSessions] = useState<Session[]>(initialSessions)
   const [foodDb, setFoodDb]     = useState<Food[]>(initialFoodDb)
@@ -120,6 +123,9 @@ export function FitnessApp({ initialSessions, initialFoodDb, initialCategories, 
   const [calendarViewMonth, setCalendarViewMonth] = useState(TODAY.slice(0, 7))
   const [activeDatesCache,  setActiveDatesCache]  = useState<Map<string, string[]>>(new Map())
   const [nutritionLoading,  setNutritionLoading]  = useState(false)
+  const [templates,     setTemplates]     = useState<MealTemplate[]>(initialTemplates)
+  const [showTemplates, setShowTemplates] = useState(false)
+  const [toastMessage,  setToastMessage]  = useState<string | null>(null)
 
   // ── Session CRUD ──────────────────────────────────────────
   const updateSession = async (id: number, updated: Session) => {
@@ -213,6 +219,41 @@ export function FitnessApp({ initialSessions, initialFoodDb, initialCategories, 
     setNutritionDay(prev => ({ ...prev, goals: g }))
   }
 
+  // ── Template CRUD ─────────────────────────────────────────────
+  const handleOpenTemplates = () => setShowTemplates(true)
+
+  const handleApplyTemplate = async (templateId: number) => {
+    const newMeals = await templateActions.applyTemplate(templateId, selectedDate)
+    setNutritionDay(prev => ({ ...prev, meals: newMeals }))
+    const t = templates.find(t => t.id === templateId)
+    if (t) setToastMessage(`已套用模版「${t.name}」`)
+  }
+
+  const handleSaveDayAsTemplate = async (name: string) => {
+    const created = await templateActions.saveDayAsTemplate(selectedDate, name)
+    setTemplates(prev => [...prev, created])
+  }
+
+  const handleCreateTemplate = async (name: string, meals: Omit<MealTemplateMeal, 'id'>[]) => {
+    const created = await templateActions.createTemplate(name, meals)
+    setTemplates(prev => [...prev, created])
+  }
+
+  const handleUpdateTemplate = async (id: number, name: string, meals: Omit<MealTemplateMeal, 'id'>[]) => {
+    const updated = await templateActions.updateTemplate(id, name, meals)
+    setTemplates(prev => prev.map(t => t.id === id ? updated : t))
+  }
+
+  const handleDeleteTemplate = async (id: number) => {
+    await templateActions.deleteTemplate(id)
+    setTemplates(prev => prev.filter(t => t.id !== id))
+  }
+
+  const handleSetDefaultTemplate = async (id: number | null) => {
+    await templateActions.setDefaultTemplate(id)
+    setTemplates(prev => prev.map(t => ({ ...t, isDefault: t.id === id })))
+  }
+
   const handleOpenCalendar = async () => {
     const key = calendarViewMonth
     setCalendarOpen(true)
@@ -246,7 +287,23 @@ export function FitnessApp({ initialSessions, initialFoodDb, initialCategories, 
     setNutritionLoading(true)
     try {
       const day = await nutritionActions.getNutritionDay(date)
-      setNutritionDay(day)
+      if (day.meals.length === 0) {
+        const defaultTemplate = templates.find(t => t.isDefault)
+        if (defaultTemplate) {
+          try {
+            const newMeals = await templateActions.applyTemplate(defaultTemplate.id, date)
+            setNutritionDay({ ...day, meals: newMeals })
+            setToastMessage(`已套用預設模版「${defaultTemplate.name}」`)
+          } catch {
+            // ALREADY_HAS_MEALS 或其他錯誤，靜默顯示空白天
+            setNutritionDay(day)
+          }
+        } else {
+          setNutritionDay(day)
+        }
+      } else {
+        setNutritionDay(day)
+      }
     } finally {
       setNutritionLoading(false)
     }
@@ -274,13 +331,16 @@ export function FitnessApp({ initialSessions, initialFoodDb, initialCategories, 
             onToggleCalendar={handleToggleCalendar}
             onSelectDate={handleSelectDate}
             onChangeMonth={handleChangeMonth}
-            onOpenTemplates={() => {}}
+            onOpenTemplates={handleOpenTemplates}
           />
         )}
         {tab === 'fooddb'    && <FoodDbHeader    count={foodDb.length} />}
         {tab === 'settings'  && <SettingsHeader />}
 
         <div style={{ flex: 1, overflow: 'hidden', position: 'relative' }}>
+          {tab === 'nutrition' && toastMessage && (
+            <TemplateAppliedToast message={toastMessage} onDone={() => setToastMessage(null)} />
+          )}
           {tab === 'workout' && (
             <WorkoutTab
               sessions={sessions}
@@ -319,6 +379,20 @@ export function FitnessApp({ initialSessions, initialFoodDb, initialCategories, 
           )}
         </div>
 
+        {showTemplates && (
+          <TemplateManagerModal
+            templates={templates}
+            foodDb={foodDb}
+            selectedDate={selectedDate}
+            onApply={handleApplyTemplate}
+            onSaveDayAsTemplate={handleSaveDayAsTemplate}
+            onCreate={handleCreateTemplate}
+            onUpdate={handleUpdateTemplate}
+            onDelete={handleDeleteTemplate}
+            onSetDefault={handleSetDefaultTemplate}
+            onClose={() => setShowTemplates(false)}
+          />
+        )}
         <BottomTabBar tab={tab} setTab={setTab} />
       </div>
     </div>
