@@ -1,9 +1,9 @@
-import { getSessions }                from '@/lib/actions/sessions'
-import { getFoods }                  from '@/lib/actions/food-catalog'
-import { getCategories }             from '@/lib/actions/food-categories'
-import { getGoals, getNutritionDay } from '@/lib/actions/nutrition'
-import { getTemplates }              from '@/lib/actions/meal-templates'
-import { FitnessApp }                from '@/components/fitness/fitness-app'
+import { getSessions }                          from '@/lib/actions/sessions'
+import { getFoods }                            from '@/lib/actions/food-catalog'
+import { getCategories }                       from '@/lib/actions/food-categories'
+import { getGoals, getNutritionDay }           from '@/lib/actions/nutrition'
+import { getTemplates, applyTemplate }         from '@/lib/actions/meal-templates'
+import { FitnessApp }                          from '@/components/fitness/fitness-app'
 
 export const dynamic = 'force-dynamic'
 
@@ -21,14 +21,34 @@ export default async function Page() {
     getTemplates(),
   ])
 
+  // 伺服器端套用預設模版（避免 React Strict Mode 在 client 造成競爭重複）
+  // Server Component 每 request 恰好執行一次，不會有 double-invocation 問題
+  let finalNutritionDay = nutritionDay
+  let initialToastMessage: string | null = null
+
+  if (nutritionDay.meals.length === 0) {
+    const defaultTemplate = templates.find(t => t.isDefault)
+    if (defaultTemplate) {
+      try {
+        // force=true：覆蓋舊資料，確保冪等性
+        const newMeals = await applyTemplate(defaultTemplate.id, TODAY, true)
+        finalNutritionDay = { ...nutritionDay, meals: newMeals }
+        initialToastMessage = `已套用預設模版「${defaultTemplate.name}」`
+      } catch {
+        // 其他錯誤：維持空白天
+      }
+    }
+  }
+
   return (
     <FitnessApp
       initialSessions={sessions}
       initialFoodDb={foodDb}
       initialCategories={categories}
       initialGoals={goals}
-      initialNutritionDay={nutritionDay}
+      initialNutritionDay={finalNutritionDay}
       initialTemplates={templates}
+      initialToastMessage={initialToastMessage}
     />
   )
 }
