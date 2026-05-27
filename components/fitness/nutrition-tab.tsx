@@ -138,7 +138,7 @@ function FoodRow({ food, isEditing, onEdit, onDelete }: {
 }
 
 // ── EditFoodModal ─────────────────────────────────────────────
-function EditFoodModal({ food, foodDb, onSave, onClose }: {
+export function EditFoodModal({ food, foodDb, onSave, onClose }: {
   food: Food
   foodDb: Food[]
   onSave: (f: Food) => void
@@ -301,7 +301,7 @@ function EditFoodModal({ food, foodDb, onSave, onClose }: {
 }
 
 // ── AddFoodModal ──────────────────────────────────────────────
-function AddFoodModal({ onAdd, onClose, foodDb }: {
+export function AddFoodModal({ onAdd, onClose, foodDb }: {
   onAdd: (f: Food) => void
   onClose: () => void
   foodDb: Food[]
@@ -549,7 +549,7 @@ function AddFoodModal({ onAdd, onClose, foodDb }: {
 }
 
 // ── MealModal ─────────────────────────────────────────────────
-function MealModal({ initial, onSave, onClose }: {
+export function MealModal({ initial, onSave, onClose }: {
   initial?: Pick<Meal, 'name' | 'time'>
   onSave: (name: string, time: string) => void
   onClose: () => void
