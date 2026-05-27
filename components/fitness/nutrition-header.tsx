@@ -11,6 +11,7 @@ export type NutritionHeaderProps = {
   onToggleCalendar:  () => void
   onSelectDate:      (date: string) => void
   onChangeMonth:     (year: number, month: number) => void
+  onOpenTemplates:   () => void
 }
 
 // ── 輔助：產生月曆格子 ────────────────────────────────────────
@@ -39,6 +40,7 @@ export function NutritionHeader({
   onToggleCalendar,
   onSelectDate,
   onChangeMonth,
+  onOpenTemplates,
 }: NutritionHeaderProps) {
   const today         = new Date().toISOString().slice(0, 10)
   const activeDateSet = new Set(activeDates)
@@ -75,26 +77,45 @@ export function NutritionHeader({
           </div>
         </div>
 
-        {/* 日曆 icon 按鈕 */}
-        <button
-          type="button"
-          onClick={onToggleCalendar}
-          style={{
-            width: 36, height: 36, borderRadius: 10,
-            background: calendarOpen ? C.orange + '30' : C.orange + '20',
-            border: `1px solid ${calendarOpen ? C.orange + '80' : C.orange + '40'}`,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            cursor: 'pointer', transition: 'background 0.15s',
-          }}
-          aria-label={calendarOpen ? '關閉日曆' : '開啟日曆'}
-        >
-          <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
-            <rect x="2" y="4" width="16" height="14" rx="2" stroke={C.orange} strokeWidth="1.6"/>
-            <line x1="6"  y1="2" x2="6"  y2="6"  stroke={C.orange} strokeWidth="1.6" strokeLinecap="round"/>
-            <line x1="14" y1="2" x2="14" y2="6"  stroke={C.orange} strokeWidth="1.6" strokeLinecap="round"/>
-            <line x1="2"  y1="9" x2="18" y2="9"  stroke={C.orange} strokeWidth="1.6"/>
-          </svg>
-        </button>
+        {/* 模版 + 日曆 icon 按鈕 */}
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <button
+            type="button"
+            onClick={onOpenTemplates}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 5,
+              background: C.orange + '20', border: `1px solid ${C.orange}50`,
+              borderRadius: 8, padding: '6px 10px', cursor: 'pointer',
+            }}
+            aria-label="開啟模版管理"
+          >
+            <svg width="13" height="13" viewBox="0 0 14 14" fill="none">
+              <rect x="1" y="1"  width="12" height="3" rx="1" stroke={C.orange} strokeWidth="1.4"/>
+              <rect x="1" y="6"  width="12" height="3" rx="1" stroke={C.orange} strokeWidth="1.4"/>
+              <rect x="1" y="11" width="7"  height="2" rx="1" fill={C.orange}/>
+            </svg>
+            <span style={{ fontSize: 11, fontWeight: 700, color: C.orange }}>模版</span>
+          </button>
+          <button
+            type="button"
+            onClick={onToggleCalendar}
+            style={{
+              width: 36, height: 36, borderRadius: 10,
+              background: calendarOpen ? C.orange + '30' : C.orange + '20',
+              border: `1px solid ${calendarOpen ? C.orange + '80' : C.orange + '40'}`,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              cursor: 'pointer', transition: 'background 0.15s',
+            }}
+            aria-label={calendarOpen ? '關閉日曆' : '開啟日曆'}
+          >
+            <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
+              <rect x="2" y="4" width="16" height="14" rx="2" stroke={C.orange} strokeWidth="1.6"/>
+              <line x1="6"  y1="2" x2="6"  y2="6"  stroke={C.orange} strokeWidth="1.6" strokeLinecap="round"/>
+              <line x1="14" y1="2" x2="14" y2="6"  stroke={C.orange} strokeWidth="1.6" strokeLinecap="round"/>
+              <line x1="2"  y1="9" x2="18" y2="9"  stroke={C.orange} strokeWidth="1.6"/>
+            </svg>
+          </button>
+        </div>
       </div>
 
       {/* ── 月曆展開區 ── */}

@@ -274,6 +274,7 @@ export function FitnessApp({ initialSessions, initialFoodDb, initialCategories, 
             onToggleCalendar={handleToggleCalendar}
             onSelectDate={handleSelectDate}
             onChangeMonth={handleChangeMonth}
+            onOpenTemplates={() => {}}
           />
         )}
         {tab === 'fooddb'    && <FoodDbHeader    count={foodDb.length} />}
