@@ -200,14 +200,17 @@ export async function saveDayAsTemplate(date: string, name: string): Promise<Mea
 
 // ── applyTemplate ─────────────────────────────────────────────
 
-export async function applyTemplate(templateId: number, date: string): Promise<Meal[]> {
+export async function applyTemplate(templateId: number, date: string, force = false): Promise<Meal[]> {
   const { userId } = await verifySession()
 
-  // Guard：若已有餐點，拋出錯誤
+  // Guard：若已有餐點，視 force 決定是否覆蓋
   const existing = await db.query.meals.findMany({
     where: (t, { and, eq }) => and(eq(t.userId, userId), eq(t.date, date)),
   })
-  if (existing.length > 0) throw new Error('ALREADY_HAS_MEALS')
+  if (existing.length > 0) {
+    if (!force) throw new Error('ALREADY_HAS_MEALS')
+    await db.delete(meals).where(and(eq(meals.userId, userId), eq(meals.date, date)))
+  }
 
   const tmpl = await db.query.mealTemplates.findFirst({
     where: (t, { and, eq }) => and(eq(t.id, templateId), eq(t.userId, userId)),
