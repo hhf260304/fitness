@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { UtensilsCrossed } from 'lucide-react'
 import type { Food, FoodCategory } from '@/lib/types'
 import { C, MACRO_COLORS } from '@/lib/fitness-constants'
 import { CategoryManagerModal } from '@/components/fitness/category-manager-modal'
@@ -321,7 +322,7 @@ export function FoodDbTab({ foodDb, categories, onAdd, onEdit, onDelete, onAddCa
 
         {filtered.length === 0 ? (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', paddingTop: 60, gap: 10 }}>
-            <div style={{ fontSize: 40 }}>🥗</div>
+            <UtensilsCrossed size={40} color={C.textTer} />
             <div style={{ fontSize: 15, fontWeight: 700, color: C.textSec }}>
               {search ? '找不到相符食物' : '食物庫是空的'}
             </div>

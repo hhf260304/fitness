@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { BookmarkPlus, ClipboardList, Pencil, Star, StarOff, Trash2 } from 'lucide-react'
 import type { MealTemplate, MealTemplateMeal, MealTemplateFood, Food } from '@/lib/types'
 import { C, MACRO_COLORS } from '@/lib/fitness-constants'
 import { AddFoodModal, EditFoodModal, MealModal } from '@/components/fitness/nutrition-tab'
@@ -26,7 +27,7 @@ export function TemplateAppliedToast({ message, onDone }: {
       borderBottom: `1px solid ${C.orange}40`,
       display: 'flex', alignItems: 'center', gap: 8,
     }}>
-      <span style={{ fontSize: 16 }}>📋</span>
+      <ClipboardList size={16} color={C.orange} />
       <span style={{ fontSize: 12, fontWeight: 700, color: C.orange }}>{message}</span>
     </div>
   )
@@ -457,8 +458,9 @@ export function TemplateManagerModal({
               flex: 1, background: C.surfaceHigh, border: `1px solid ${C.border}`,
               borderRadius: 10, padding: '10px', cursor: 'pointer',
               color: C.textSec, fontSize: 12, fontWeight: 700,
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5,
             }}
-          >📋 另存今天</button>
+          ><BookmarkPlus size={13} /> 另存今天</button>
         </div>
 
         {/* 另存今天：輸入名稱 */}
@@ -570,19 +572,21 @@ export function TemplateManagerModal({
                           setMenuOpenId(null)
                         }}
                         style={{
-                          display: 'block', width: '100%', textAlign: 'left' as const,
+                          display: 'flex', alignItems: 'center', gap: 6,
+                          width: '100%', textAlign: 'left' as const,
                           background: 'none', border: 'none', padding: '9px 12px',
                           fontSize: 13, fontWeight: 600, color: C.text, cursor: 'pointer', borderRadius: 8,
                         }}
-                      >{t.isDefault ? '⭐ 取消預設' : '⭐ 設為預設'}</button>
+                      >{t.isDefault ? <><StarOff size={13} /> 取消預設</> : <><Star size={13} /> 設為預設</>}</button>
                       <button
                         onClick={() => { setEditingTemplate(t); setMenuOpenId(null) }}
                         style={{
-                          display: 'block', width: '100%', textAlign: 'left' as const,
+                          display: 'flex', alignItems: 'center', gap: 6,
+                          width: '100%', textAlign: 'left' as const,
                           background: 'none', border: 'none', padding: '9px 12px',
                           fontSize: 13, fontWeight: 600, color: C.text, cursor: 'pointer', borderRadius: 8,
                         }}
-                      >✏️ 編輯模版</button>
+                      ><Pencil size={13} /> 編輯模版</button>
                       <div style={{ height: 1, background: C.border, margin: '4px 0' }} />
                       <button
                         onClick={async () => {
@@ -592,11 +596,12 @@ export function TemplateManagerModal({
                           setMenuOpenId(null)
                         }}
                         style={{
-                          display: 'block', width: '100%', textAlign: 'left' as const,
+                          display: 'flex', alignItems: 'center', gap: 6,
+                          width: '100%', textAlign: 'left' as const,
                           background: 'none', border: 'none', padding: '9px 12px',
                           fontSize: 13, fontWeight: 600, color: C.red, cursor: 'pointer', borderRadius: 8,
                         }}
-                      >🗑 刪除</button>
+                      ><Trash2 size={13} /> 刪除</button>
                     </div>
                   </>
                 )}

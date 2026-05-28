@@ -1,5 +1,6 @@
 'use client'
 
+import { Calendar, ChevronLeft, ChevronRight, LayoutList } from 'lucide-react'
 import { C } from '@/lib/fitness-constants'
 
 // ── 型別 ─────────────────────────────────────────────────────
@@ -84,16 +85,13 @@ export function NutritionHeader({
             onClick={onOpenTemplates}
             style={{
               display: 'flex', alignItems: 'center', gap: 5,
+              height: 36, boxSizing: 'border-box',
               background: C.orange + '20', border: `1px solid ${C.orange}50`,
-              borderRadius: 8, padding: '6px 10px', cursor: 'pointer',
+              borderRadius: 8, padding: '0 10px', cursor: 'pointer',
             }}
             aria-label="開啟模版管理"
           >
-            <svg width="13" height="13" viewBox="0 0 14 14" fill="none">
-              <rect x="1" y="1"  width="12" height="3" rx="1" stroke={C.orange} strokeWidth="1.4"/>
-              <rect x="1" y="6"  width="12" height="3" rx="1" stroke={C.orange} strokeWidth="1.4"/>
-              <rect x="1" y="11" width="7"  height="2" rx="1" fill={C.orange}/>
-            </svg>
+            <LayoutList size={15} color={C.orange} strokeWidth={1.8} />
             <span style={{ fontSize: 11, fontWeight: 700, color: C.orange }}>模版</span>
           </button>
           <button
@@ -108,12 +106,7 @@ export function NutritionHeader({
             }}
             aria-label={calendarOpen ? '關閉日曆' : '開啟日曆'}
           >
-            <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
-              <rect x="2" y="4" width="16" height="14" rx="2" stroke={C.orange} strokeWidth="1.6"/>
-              <line x1="6"  y1="2" x2="6"  y2="6"  stroke={C.orange} strokeWidth="1.6" strokeLinecap="round"/>
-              <line x1="14" y1="2" x2="14" y2="6"  stroke={C.orange} strokeWidth="1.6" strokeLinecap="round"/>
-              <line x1="2"  y1="9" x2="18" y2="9"  stroke={C.orange} strokeWidth="1.6"/>
-            </svg>
+            <Calendar size={18} color={C.orange} strokeWidth={1.6} />
           </button>
         </div>
       </div>
@@ -136,9 +129,7 @@ export function NutritionHeader({
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}
             >
-              <svg width="7" height="11" viewBox="0 0 7 11" fill="none">
-                <path d="M5.5 1L1 5.5l4.5 4.5" stroke={C.textSec} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
+              <ChevronLeft size={14} color={C.textSec} strokeWidth={1.8} />
             </button>
 
             <span style={{ fontSize: 13, fontWeight: 800, color: C.text }}>
@@ -157,9 +148,7 @@ export function NutritionHeader({
                 opacity: isNextDisabled ? 0.3 : 1,
               }}
             >
-              <svg width="7" height="11" viewBox="0 0 7 11" fill="none">
-                <path d="M1.5 1L6 5.5 1.5 10" stroke={C.textSec} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
+              <ChevronRight size={14} color={C.textSec} strokeWidth={1.8} />
             </button>
           </div>
 

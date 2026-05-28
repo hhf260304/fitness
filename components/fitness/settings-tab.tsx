@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { Check } from 'lucide-react'
 import type { Goals } from '@/lib/types'
 import { C, MACRO_COLORS } from '@/lib/fitness-constants'
 import { logout } from '@/lib/actions/auth'
@@ -207,7 +208,7 @@ export function SettingsTab({ goals, onSave }: {
           cursor: 'pointer', transition: 'background 0.3s',
           display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
         }}>
-          {saved ? '✓ 已儲存' : '儲存設定'}
+          {saved ? <><Check size={16} /> 已儲存</> : '儲存設定'}
         </button>
       </div>
 

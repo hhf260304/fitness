@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { Check, Dumbbell } from 'lucide-react'
 import type { Session, Exercise, MuscleGroup } from '@/lib/types'
 import { C, MUSCLE_COLORS, MUSCLES } from '@/lib/fitness-constants'
 import type { DraggableSyntheticListeners } from '@dnd-kit/core'
@@ -223,7 +224,8 @@ function ExerciseEditCard({
         <button onClick={() => onSave(local)} style={{
           flex: 1, background: C.accent, color: '#fff', border: 'none',
           borderRadius: 10, padding: '10px', fontSize: 14, fontWeight: 800, cursor: 'pointer',
-        }}>✓ 完成</button>
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+        }}><Check size={16} /> 完成</button>
         <button onClick={onDelete} style={{
           background: C.red + '18', color: C.red,
           border: `1px solid ${C.red}30`, borderRadius: 10, padding: '10px 14px',
@@ -690,7 +692,7 @@ export function WorkoutTab({
       <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden' }}>
         {sessions.length === 0 ? (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '60%', gap: 10 }}>
-            <div style={{ fontSize: 44, lineHeight: 1 }}>🏋️</div>
+            <Dumbbell size={44} color={C.textTer} />
             <div style={{ fontSize: 15, fontWeight: 700, color: C.textSec }}>尚無訓練紀錄</div>
             <div style={{ fontSize: 12, color: C.textTer }}>點下方按鈕建立第一份訓練</div>
           </div>
