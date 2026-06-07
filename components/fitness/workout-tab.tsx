@@ -244,14 +244,14 @@ function AddExerciseModal({
   onClose: () => void
 }) {
   const [form, setForm] = useState({
-    name: '', muscle: '' as MuscleGroup | '', sets: 3, weight: 60, reps: 10, rest: 90,
+    name: '', muscle: '' as MuscleGroup | '', sets: 0, weight: 0, reps: 0, rest: 0,
   })
   const set = <K extends keyof typeof form>(k: K, v: typeof form[K]) =>
     setForm(prev => ({ ...prev, [k]: v }))
 
   type NumKey2 = 'sets' | 'reps' | 'weight' | 'rest'
   const [strVals, setStrVals] = useState<Record<NumKey2, string>>({
-    sets: '3', reps: '10', weight: '60', rest: '90',
+    sets: '', reps: '', weight: '', rest: '',
   })
 
   const numInp = (key: NumKey2, label: string, color: string) => (

@@ -254,12 +254,15 @@ export function TemplateEditorModal({ template, foodDb, onSave, onClose }: {
   const totalCal = localMeals.reduce((s, m) => s + m.foods.reduce((fs, f) => fs + f.calories, 0), 0)
 
   return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 110, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
+    <div style={{ position: 'fixed', inset: 0, zIndex: 110, overflow: 'hidden' }}>
       <div onClick={onClose} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.72)' }} />
       <div style={{
-        position: 'relative', background: C.surfaceHigh, borderRadius: 20,
-        width: '100%', maxWidth: 430, maxHeight: '85dvh',
+        position: 'absolute', top: '50%', left: '50%',
+        transform: 'translate(-50%, -50%)',
+        width: 'calc(100% - 32px)', maxWidth: 430, height: '85dvh',
+        background: C.surfaceHigh, borderRadius: 20,
         display: 'flex', flexDirection: 'column',
+        overflow: 'hidden',
         boxShadow: '0 24px 48px rgba(0,0,0,0.5)',
       }}>
         {/* Header */}
@@ -309,29 +312,31 @@ export function TemplateEditorModal({ template, foodDb, onSave, onClose }: {
         </div>
 
         {/* 餐點清單 */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: '0 16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {localMeals.map(meal => (
-            <TemplateMealCard
-              key={meal.localId}
-              meal={meal}
-              foodDb={foodDb}
-              onChange={updated => setLocalMeals(prev => prev.map(m => m.localId === meal.localId ? updated : m))}
-              onDelete={() => setLocalMeals(prev => prev.filter(m => m.localId !== meal.localId))}
-            />
-          ))}
+        <div style={{ flex: 1, minHeight: 0, overflowY: 'scroll', padding: '0 16px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {localMeals.map(meal => (
+              <TemplateMealCard
+                key={meal.localId}
+                meal={meal}
+                foodDb={foodDb}
+                onChange={updated => setLocalMeals(prev => prev.map(m => m.localId === meal.localId ? updated : m))}
+                onDelete={() => setLocalMeals(prev => prev.filter(m => m.localId !== meal.localId))}
+              />
+            ))}
 
-          <button
-            onClick={() => setShowAddMeal(true)}
-            style={{
-              background: C.orange + '10', border: `1.5px dashed ${C.orange}50`,
-              borderRadius: 14, padding: '13px',
-              color: C.orange, fontSize: 13, fontWeight: 700, cursor: 'pointer',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-            }}
-          >
-            <span style={{ fontSize: 16, lineHeight: 1 }}>+</span> 新增一餐
-          </button>
-          <div style={{ height: 16 }} />
+            <button
+              onClick={() => setShowAddMeal(true)}
+              style={{
+                background: C.orange + '10', border: `1.5px dashed ${C.orange}50`,
+                borderRadius: 14, padding: '13px',
+                color: C.orange, fontSize: 13, fontWeight: 700, cursor: 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+              }}
+            >
+              <span style={{ fontSize: 16, lineHeight: 1 }}>+</span> 新增一餐
+            </button>
+            <div style={{ height: 16 }} />
+          </div>
         </div>
 
         {/* 底部摘要 */}

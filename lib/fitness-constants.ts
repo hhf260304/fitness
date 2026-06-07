@@ -29,4 +29,4 @@ export const MACRO_COLORS = {
   carbs:   '#8B6500',
 }
 
-export const MUSCLES = ['胸', '背', '腿', '肩', '二頭', '三頭', '核心', '全身'] as const
+export const MUSCLES = ['胸', '背', '腿', '肩', '二頭', '三頭', '核心'] as const
