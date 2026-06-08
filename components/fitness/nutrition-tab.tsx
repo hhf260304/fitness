@@ -635,7 +635,7 @@ function MealSection({ meal, onUpdate, onDelete, foodDb, dragListeners, dragAttr
   const [isEditing, setIsEditing]     = useState(false)
   const [showAdd, setShowAdd]         = useState(false)
   const [editingFood, setEditingFood] = useState<Food | null>(null)
-  const [expanded, setExpanded]       = useState(true)
+  const [expanded, setExpanded]       = useState(false)
   const [showMealEdit, setShowMealEdit] = useState(false)
 
   const mealCal  = meal.foods.reduce((s, f) => s + f.calories, 0)
