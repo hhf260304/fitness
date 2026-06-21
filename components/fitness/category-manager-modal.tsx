@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import type { FoodCategory } from '@/lib/types'
 import { C } from '@/lib/fitness-constants'
+import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 
 export function CategoryManagerModal({
   categories,
@@ -20,6 +21,7 @@ export function CategoryManagerModal({
   const [newName, setNewName]     = useState('')
   const [editingId, setEditingId] = useState<number | null>(null)
   const [editName, setEditName]   = useState('')
+  const [deletingCat, setDeletingCat] = useState<{ id: number; name: string } | null>(null)
 
   const handleAdd = () => {
     const trimmed = newName.trim()
@@ -93,7 +95,7 @@ export function CategoryManagerModal({
                     fontSize: 12, fontWeight: 700, cursor: 'pointer', padding: '4px 8px',
                   }}>改名</button>
                   <button onClick={() => {
-                    if (window.confirm(`刪除分類「${cat.name}」？該分類的食物將變為未分類。`)) onDelete(cat.id)
+                    setDeletingCat({ id: cat.id, name: cat.name })
                   }} style={{
                     background: 'none', border: 'none', color: C.red,
                     fontSize: 12, fontWeight: 700, cursor: 'pointer', padding: '4px 8px',
@@ -130,5 +132,22 @@ export function CategoryManagerModal({
         </div>
       </div>
     </div>
+    <ConfirmDialog
+      open={deletingCat !== null}
+      onOpenChange={open => { if (!open) setDeletingCat(null) }}
+      title={`刪除「${deletingCat?.name}」？`}
+      description={
+        <>
+          此操作無法復原。{' '}
+          <span style={{ color: '#D32F2F', fontWeight: 600 }}>
+            該分類的食物將變為未分類。
+          </span>
+        </>
+      }
+      onConfirm={() => {
+        if (deletingCat) onDelete(deletingCat.id)
+        setDeletingCat(null)
+      }}
+    />
   )
 }
