@@ -5,6 +5,7 @@ import { BookmarkPlus, ClipboardList, Pencil, Star, StarOff, Trash2 } from 'luci
 import type { MealTemplate, MealTemplateMeal, MealTemplateFood, Food } from '@/lib/types'
 import { C, MACRO_COLORS } from '@/lib/fitness-constants'
 import { AddFoodModal, EditFoodModal, MealModal } from '@/components/fitness/nutrition-tab'
+import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 
 const fmt = (n: number) => +n.toFixed(1)
 
@@ -396,6 +397,7 @@ export function TemplateManagerModal({
   const [saveDayMode, setSaveDayMode]         = useState(false)
   const [saveDayName, setSaveDayName]         = useState('')
   const [applying, setApplying]               = useState<number | null>(null)
+  const [deletingTemplate, setDeletingTemplate] = useState<{ id: number; name: string } | null>(null)
 
   const handleApply = async (id: number) => {
     setApplying(id)
@@ -594,10 +596,8 @@ export function TemplateManagerModal({
                       ><Pencil size={13} /> 編輯模版</button>
                       <div style={{ height: 1, background: C.border, margin: '4px 0' }} />
                       <button
-                        onClick={async () => {
-                          if (window.confirm(`刪除「${t.name}」模版？`)) {
-                            await onDelete(t.id)
-                          }
+                        onClick={() => {
+                          setDeletingTemplate({ id: t.id, name: t.name })
                           setMenuOpenId(null)
                         }}
                         style={{
@@ -615,6 +615,16 @@ export function TemplateManagerModal({
           })}
         </div>
       </div>
+      <ConfirmDialog
+        open={deletingTemplate !== null}
+        onOpenChange={open => { if (!open) setDeletingTemplate(null) }}
+        title={`刪除「${deletingTemplate?.name}」？`}
+        description="此操作無法復原。"
+        onConfirm={async () => {
+          if (deletingTemplate) await onDelete(deletingTemplate.id)
+          setDeletingTemplate(null)
+        }}
+      />
     </div>
   )
 }
