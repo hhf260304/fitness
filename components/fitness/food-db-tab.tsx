@@ -5,6 +5,7 @@ import { UtensilsCrossed } from 'lucide-react'
 import type { Food, FoodCategory } from '@/lib/types'
 import { C, MACRO_COLORS } from '@/lib/fitness-constants'
 import { CategoryManagerModal } from '@/components/fitness/category-manager-modal'
+import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 
 // ── FoodFormModal ─────────────────────────────────────────────
 function FoodFormModal({ initial, onSave, onClose, title, categories }: {
@@ -237,6 +238,7 @@ export function FoodDbTab({ foodDb, categories, onAdd, onEdit, onDelete, onAddCa
   const [editItem,             setEditItem]             = useState<Food | null>(null)
   const [selectedCategoryId,   setSelectedCategoryId]   = useState<number | null>(null)
   const [showCategoryManager,  setShowCategoryManager]  = useState(false)
+  const [deletingFood,         setDeletingFood]         = useState<{ id: number; name: string } | null>(null)
 
   // Reset category filter if the selected category is deleted
   useEffect(() => {
@@ -334,7 +336,7 @@ export function FoodDbTab({ foodDb, categories, onAdd, onEdit, onDelete, onAddCa
               <FoodDbCard
                 key={food.id} food={food}
                 onEdit={() => { setEditItem(food); setShowForm(true) }}
-                onDelete={() => { if (window.confirm(`刪除「${food.name}」？`)) onDelete(food.id) }}
+                onDelete={() => setDeletingFood({ id: food.id, name: food.name })}
               />
             ))}
           </div>
@@ -376,6 +378,17 @@ export function FoodDbTab({ foodDb, categories, onAdd, onEdit, onDelete, onAddCa
           onClose={() => setShowCategoryManager(false)}
         />
       )}
+
+      <ConfirmDialog
+        open={deletingFood !== null}
+        onOpenChange={open => { if (!open) setDeletingFood(null) }}
+        title={`刪除「${deletingFood?.name}」？`}
+        description="此操作無法復原。"
+        onConfirm={() => {
+          if (deletingFood) onDelete(deletingFood.id)
+          setDeletingFood(null)
+        }}
+      />
     </div>
   )
 }
