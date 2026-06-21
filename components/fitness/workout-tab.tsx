@@ -14,6 +14,7 @@ import {
   arrayMove, useSortable,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
+import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 
 // ── MuscleTag ─────────────────────────────────────────────────
 function MuscleTag({ muscle, small }: { muscle: string; small?: boolean }) {
@@ -371,6 +372,7 @@ function SessionCard({
   const [showAddEx, setShowAddEx] = useState(false)
   const [editingName, setEditingName] = useState(false)
   const [nameInput,   setNameInput]   = useState(session.name)
+  const [deleteOpen, setDeleteOpen] = useState(false)
 
   const exSensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -509,7 +511,7 @@ function SessionCard({
           <button
             onClick={e => {
               e.stopPropagation()
-              if (window.confirm(`刪除「${session.name}」？`)) onDelete()
+              setDeleteOpen(true)
             }}
             style={{
               background: C.red + '18', border: 'none', borderRadius: 8,
@@ -567,6 +569,13 @@ function SessionCard({
           )}
         </div>
       )}
+      <ConfirmDialog
+        open={deleteOpen}
+        onOpenChange={setDeleteOpen}
+        title={`刪除「${session.name}」？`}
+        description="此操作無法復原。"
+        onConfirm={() => { onDelete(); setDeleteOpen(false) }}
+      />
     </div>
   )
 }
