@@ -1,5 +1,6 @@
 'use client'
 
+import type { ReactNode } from 'react'
 import { AlertDialog } from 'radix-ui'
 import { Trash2, TriangleAlert } from 'lucide-react'
 
@@ -7,7 +8,7 @@ interface ConfirmDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   title: string
-  description?: React.ReactNode
+  description?: ReactNode
   confirmLabel?: string
   onConfirm: () => void
   variant?: 'destructive' | 'warning'
@@ -49,7 +50,6 @@ export function ConfirmDialog({
             width: 'min(320px, calc(100vw - 32px))',
             boxShadow: '0 8px 40px rgba(0,0,0,0.2)',
             animation: 'confirmDialogIn 150ms ease',
-            outline: 'none',
           }}
         >
           {/* Icon */}
@@ -75,13 +75,12 @@ export function ConfirmDialog({
             </AlertDialog.Title>
 
             {/* Description */}
-            {description && (
-              <AlertDialog.Description style={{
-                fontSize: 12, color: '#888', lineHeight: 1.6, margin: 0,
-              }}>
-                {description}
-              </AlertDialog.Description>
-            )}
+            <AlertDialog.Description style={{
+              fontSize: 12, color: '#888', lineHeight: 1.6, margin: 0,
+              ...(description ? {} : { display: 'none' }),
+            }}>
+              {description}
+            </AlertDialog.Description>
           </div>
 
           {/* Buttons */}
