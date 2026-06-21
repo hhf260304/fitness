@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
+import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import type { TabId, Session, Food, Goals, NutritionDay, Meal, FoodCategory, MealTemplate, MealTemplateMeal } from '@/lib/types'
 import { C } from '@/lib/fitness-constants'
 import * as sessionActions   from '@/lib/actions/sessions'
@@ -130,6 +131,8 @@ export function FitnessApp({ initialSessions, initialFoodDb, initialCategories, 
   const [showTemplates, setShowTemplates] = useState(false)
   // initialToastMessage 由 page.tsx 伺服器端套用模版後傳入（若有套用）
   const [toastMessage,  setToastMessage]  = useState<string | null>(initialToastMessage)
+  const [overwriteOpen, setOverwriteOpen] = useState(false)
+  const pendingOverwrite = useRef<(() => Promise<void>) | null>(null)
 
   // ── Session CRUD ──────────────────────────────────────────
   const updateSession = async (id: number, updated: Session) => {
@@ -246,9 +249,8 @@ export function FitnessApp({ initialSessions, initialFoodDb, initialCategories, 
       await applyAndUpdate(false)
     } catch (e: unknown) {
       if (e instanceof Error && e.message === 'ALREADY_HAS_MEALS') {
-        const ok = window.confirm('此日期已有餐點記錄，確定要以模版覆蓋嗎？')
-        if (!ok) return
-        await applyAndUpdate(true)
+        pendingOverwrite.current = () => applyAndUpdate(true)
+        setOverwriteOpen(true)
       } else {
         throw e
       }
@@ -428,6 +430,21 @@ export function FitnessApp({ initialSessions, initialFoodDb, initialCategories, 
         )}
         <BottomTabBar tab={tab} setTab={setTab} />
       </div>
+      <ConfirmDialog
+        open={overwriteOpen}
+        onOpenChange={setOverwriteOpen}
+        title="覆蓋現有餐點記錄？"
+        description="此日期已有餐點記錄，套用模版將會覆蓋現有內容。"
+        confirmLabel="確認覆蓋"
+        variant="warning"
+        onConfirm={async () => {
+          setOverwriteOpen(false)
+          if (pendingOverwrite.current) {
+            await pendingOverwrite.current()
+            pendingOverwrite.current = null
+          }
+        }}
+      />
     </div>
   )
 }
