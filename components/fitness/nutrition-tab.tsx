@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import type { Meal, Food, Goals, NutritionDay } from '@/lib/types'
+import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { C, MACRO_COLORS } from '@/lib/fitness-constants'
 import type { DraggableSyntheticListeners } from '@dnd-kit/core'
 import {
@@ -637,6 +638,7 @@ function MealSection({ meal, onUpdate, onDelete, foodDb, dragListeners, dragAttr
   const [editingFood, setEditingFood] = useState<Food | null>(null)
   const [expanded, setExpanded]       = useState(false)
   const [showMealEdit, setShowMealEdit] = useState(false)
+  const [deleteOpen, setDeleteOpen] = useState(false)
 
   const mealCal  = meal.foods.reduce((s, f) => s + f.calories, 0)
   const mealProt = meal.foods.reduce((s, f) => s + f.protein, 0)
@@ -717,7 +719,7 @@ function MealSection({ meal, onUpdate, onDelete, foodDb, dragListeners, dragAttr
             <button
               onClick={e => {
                 e.stopPropagation()
-                if (window.confirm(`刪除「${meal.name}」？`)) onDelete()
+                setDeleteOpen(true)
               }}
               style={{
                 background: C.red + '18', color: C.red,
@@ -789,6 +791,14 @@ function MealSection({ meal, onUpdate, onDelete, foodDb, dragListeners, dragAttr
           onClose={() => setShowMealEdit(false)}
         />
       )}
+
+      <ConfirmDialog
+        open={deleteOpen}
+        onOpenChange={setDeleteOpen}
+        title={`刪除「${meal.name}」？`}
+        description="此操作無法復原。"
+        onConfirm={() => { onDelete(); setDeleteOpen(false) }}
+      />
     </div>
   )
 }
