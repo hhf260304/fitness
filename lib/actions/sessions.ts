@@ -8,14 +8,15 @@ import { verifySession } from '@/lib/session'
 
 function toExercise(row: typeof exercises.$inferSelect): Exercise {
   return {
-    id:     row.id,
-    name:   row.name,
-    nameEn: row.nameEn ?? undefined,
-    muscle: row.muscle as Exercise['muscle'],
-    sets:   row.sets,
-    reps:   row.reps,
-    weight: Number(row.weight),
-    rest:   row.rest,
+    id:         row.id,
+    name:       row.name,
+    nameEn:     row.nameEn ?? undefined,
+    muscle:     row.muscle as Exercise['muscle'],
+    sets:       row.sets,
+    reps:       row.reps,
+    weight:     Number(row.weight),
+    weightUnit: (row.weightUnit ?? 'kg') as 'kg' | 'lb',
+    rest:       row.rest,
   }
 }
 
@@ -50,14 +51,15 @@ export async function createSession(data: Omit<Session, 'id'>): Promise<Session>
   if (data.exercises.length > 0) {
     await db.insert(exercises).values(
       data.exercises.map(e => ({
-        sessionId: inserted.id,
-        name:      e.name,
-        nameEn:    e.nameEn ?? null,
-        muscle:    e.muscle,
-        sets:      e.sets,
-        reps:      e.reps,
-        weight:    String(e.weight),
-        rest:      e.rest,
+        sessionId:  inserted.id,
+        name:       e.name,
+        nameEn:     e.nameEn ?? null,
+        muscle:     e.muscle,
+        sets:       e.sets,
+        reps:       e.reps,
+        weight:     String(e.weight),
+        weightUnit: e.weightUnit ?? 'kg',
+        rest:       e.rest,
       }))
     )
   }
@@ -77,14 +79,15 @@ export async function updateSession(id: number, data: Omit<Session, 'id'>): Prom
   if (data.exercises.length > 0) {
     await db.insert(exercises).values(
       data.exercises.map(e => ({
-        sessionId: id,
-        name:      e.name,
-        nameEn:    e.nameEn ?? null,
-        muscle:    e.muscle,
-        sets:      e.sets,
-        reps:      e.reps,
-        weight:    String(e.weight),
-        rest:      e.rest,
+        sessionId:  id,
+        name:       e.name,
+        nameEn:     e.nameEn ?? null,
+        muscle:     e.muscle,
+        sets:       e.sets,
+        reps:       e.reps,
+        weight:     String(e.weight),
+        weightUnit: e.weightUnit ?? 'kg',
+        rest:       e.rest,
       }))
     )
   }

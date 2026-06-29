@@ -17,15 +17,16 @@ export const sessions = pgTable('sessions', {
 })
 
 export const exercises = pgTable('exercises', {
-  id:        serial('id').primaryKey(),
-  sessionId: integer('session_id').notNull().references(() => sessions.id, { onDelete: 'cascade' }),
-  name:      text('name').notNull(),
-  nameEn:    text('name_en'),
-  muscle:    text('muscle').notNull(),
-  sets:      integer('sets').notNull(),
-  reps:      integer('reps').notNull(),
-  weight:    numeric('weight', { precision: 6, scale: 2 }).notNull(),
-  rest:      integer('rest').notNull(),
+  id:         serial('id').primaryKey(),
+  sessionId:  integer('session_id').notNull().references(() => sessions.id, { onDelete: 'cascade' }),
+  name:       text('name').notNull(),
+  nameEn:     text('name_en'),
+  muscle:     text('muscle').notNull(),
+  sets:       integer('sets').notNull(),
+  reps:       integer('reps').notNull(),
+  weight:     numeric('weight', { precision: 6, scale: 2 }).notNull(),
+  weightUnit: text('weight_unit').default('kg'),
+  rest:       integer('rest').notNull(),
 })
 
 export const foodCategories = pgTable('food_categories', {

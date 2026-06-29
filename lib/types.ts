@@ -7,7 +7,8 @@ export type Exercise = {
   muscle: MuscleGroup
   sets: number
   reps: number
-  weight: number
+  weight: number        // always stored in kg
+  weightUnit?: 'kg' | 'lb'
   rest: number
 }
 
